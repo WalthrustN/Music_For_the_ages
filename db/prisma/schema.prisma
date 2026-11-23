@@ -1,0 +1,88 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Genre {
+  id        Int     @id @default(autoincrement())
+  slug      String  @unique
+  name      String
+  parentId  Int?    @map("parent_id")
+  sortOrder Int     @default(0) @map("sort_order")
+  parent    Genre?  @relation("GenreParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Genre[] @relation("GenreParent")
+  charts    Chart[]
+
+  @@map("genres")
+}
+
+model Artist {
+  id             Int    @id @default(autoincrement())
+  name           String
+  nameNormalized String @unique @map("name_normalized")
+  songs          Song[]
+
+  @@map("artists")
+}
+
+model Song {
+  id              Int          @id @default(autoincrement())
+  title           String
+  titleNormalized String       @map("title_normalized")
+  primaryArtistId Int          @map("primary_artist_id")
+  featuredArtists String?      @map("featured_artists") @db.Text
+  releaseYear     Int?         @map("release_year")
+  primaryArtist   Artist       @relation(fields: [primaryArtistId], references: [id])
+  entries         ChartEntry[]
+
+  @@unique([titleNormalized, primaryArtistId])
+  @@index([primaryArtistId])
+  @@map("songs")
+}
+
+model Chart {
+  id              Int          @id @default(autoincrement())
+  year            Int
+  genreId         Int          @map("genre_id")
+  sourceName      String       @map("source_name") @db.Text
+  sourceUrl       String?      @map("source_url") @db.Text
+  isOfficial      Boolean      @map("is_official")
+  methodologyNote String?      @map("methodology_note") @db.Text
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  genre           Genre        @relation(fields: [genreId], references: [id])
+  entries         ChartEntry[]
+
+  @@unique([year, genreId])
+  @@index([genreId, year])
+  @@map("charts")
+}
+
+model ChartEntry {
+  id      Int   @id @default(autoincrement())
+  chartId Int   @map("chart_id")
+  rank    Int
+  songId  Int   @map("song_id")
+  chart   Chart @relation(fields: [chartId], references: [id], onDelete: Cascade)
+  song    Song  @relation(fields: [songId], references: [id])
+
+  @@unique([chartId, rank])
+  @@unique([chartId, songId])
+  @@index([songId])
+  @@map("chart_entries")
+}
+
+view ChartCoverage {
+  genreSlug  String   @map("genre_slug")
+  year       Int
+  entryCount Int      @map("entry_count")
+  isOfficial Boolean? @map("is_official")
+
+  @@unique([genreSlug, year])
+  @@map("chart_coverage")
+}

@@ -1,0 +1,7 @@
+rank,title,artist,featured_artists,release_year
+1,Mock Song 1,Mock Artist A,Mock Artist B,1972
+2,Mock Song 6,Mock Artist C,,1971
+3,Mock Song 8,Mock Artist B,,
+4,Mock Song 14,Mock Artist A,,1970
+5,Mock Song 19,Mock Artist C,Mock Artist B,1972
+6,Mock Song 27,Mock Artist B,,1969

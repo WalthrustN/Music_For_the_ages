@@ -1,0 +1,32 @@
+{
+  "name": "@chart-archive/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "dotenv -e ../.env -- prisma migrate deploy",
+    "migrate:dev": "dotenv -e ../.env -- prisma migrate dev",
+    "seed": "dotenv -e ../.env -- tsx prisma/seed.ts",
+    "import": "dotenv -e ../.env -- tsx src/import/cli.ts",
+    "test": "dotenv -e ../.env -- vitest run"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^8.0.0",
+    "prisma": "^6.16.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

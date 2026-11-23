@@ -1,0 +1,24 @@
+{
+  "name": "music-for-the-ages",
+  "private": true,
+  "workspaces": [
+    "db",
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,web -c cyan,magenta \"npm run dev -w @chart-archive/server\" \"npm run dev -w @chart-archive/web\"",
+    "db:migrate": "npm run migrate -w @chart-archive/db",
+    "db:seed": "npm run seed -w @chart-archive/db",
+    "import": "npm run import -w @chart-archive/db --",
+    "test": "npm run test -w @chart-archive/db && npm run test -w @chart-archive/server",
+    "videos:optimize": "npm run videos:optimize -w @chart-archive/web",
+    "postinstall": "npm run generate -w @chart-archive/db"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
