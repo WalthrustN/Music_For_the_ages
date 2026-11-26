@@ -9,6 +9,11 @@
 
 :root {
   color-scheme: dark;
+  --panel-alpha: 0.5;
+}
+
+.panel-glass {
+  background-color: rgb(10 10 10 / var(--panel-alpha));
 }
 
 html,

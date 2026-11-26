@@ -6,6 +6,8 @@ import { runAssistant } from './llm/loop.js'
 import { systemPrompt } from './llm/prompt.js'
 import { executeTool, TOOL_DEFINITIONS, type ToolContext } from './llm/tools.js'
 import type { LLMClient } from './llm/types.js'
+import { addSongToPlaylist, createPlaylist } from './playlists.js'
+import { parseYouTubeVideoId } from './youtube.js'
 import {
   getArtistHistory,
   getChart,
@@ -17,6 +19,7 @@ import {
 
 export type AppDeps = {
   db: PrismaClient
+  writer?: PrismaClient
   whisperUrl?: string | null
   llm?: LLMClient | null
   logTools?: boolean
@@ -79,7 +82,7 @@ export async function buildApp(deps: AppDeps) {
         genre: z.string().optional(),
         yearFrom: z.coerce.number().int().optional(),
         yearTo: z.coerce.number().int().optional(),
-        rankMax: z.coerce.number().int().min(1).max(100).optional(),
+        rankMax: z.coerce.number().int().min(1).optional(),
         limit: z.coerce.number().int().min(1).max(50).optional(),
       }),
       request.query,
@@ -111,6 +114,65 @@ export async function buildApp(deps: AppDeps) {
     const song = await getSongDetail(deps.db, params.id)
     if (!song) return reply.code(404).send({ error: 'Song not found' })
     return song
+  })
+
+  app.patch('/api/songs/:id/recording', async (request, reply) => {
+    if (!deps.writer) return reply.code(503).send({ error: 'Recording edits are not available.' })
+    const params = parseOr400(z.object({ id: z.coerce.number().int().positive() }), request.params, reply)
+    if (!params) return
+    const body = parseOr400(
+      z.object({ youtubeVideoId: z.string().trim().max(200).nullable() }),
+      request.body,
+      reply,
+    )
+    if (!body) return
+    const youtubeVideoId = body.youtubeVideoId ? parseYouTubeVideoId(body.youtubeVideoId) : null
+    if (body.youtubeVideoId && !youtubeVideoId) {
+      return reply.code(400).send({ error: 'Paste a YouTube link or an 11-character video id.' })
+    }
+    const existing = await deps.writer.song.findUnique({ where: { id: params.id } })
+    if (!existing) return reply.code(404).send({ error: 'Song not found' })
+    const song = await deps.writer.song.update({
+      where: { id: params.id },
+      data: { youtubeVideoId },
+    })
+    return { id: song.id, youtubeVideoId: song.youtubeVideoId }
+  })
+
+  const lists = deps.writer ?? deps.db
+
+  app.post('/api/playlists', async (request, reply) => {
+    const body = parseOr400(
+      z.object({
+        genre: z.string().min(1),
+        year: z.number().int().min(1925).max(2100),
+        name: z.string().trim().min(1).max(120),
+      }),
+      request.body,
+      reply,
+    )
+    if (!body) return
+    const result = await createPlaylist(lists, body)
+    if ('error' in result) return reply.code(result.status).send({ error: result.error })
+    return reply.code(201).send(result)
+  })
+
+  app.post('/api/playlists/:id/songs', async (request, reply) => {
+    const params = parseOr400(z.object({ id: z.coerce.number().int().positive() }), request.params, reply)
+    if (!params) return
+    const body = parseOr400(
+      z.object({
+        songId: z.number().int().positive().optional(),
+        title: z.string().trim().min(1).optional(),
+        artist: z.string().trim().min(1).optional(),
+      }),
+      request.body,
+      reply,
+    )
+    if (!body) return
+    const result = await addSongToPlaylist(lists, params.id, body)
+    if ('error' in result) return reply.code(result.status).send({ error: result.error })
+    return reply.code(201).send(result)
   })
 
   app.post('/api/assistant', async (request, reply) => {

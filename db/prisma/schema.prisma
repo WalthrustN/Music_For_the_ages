@@ -14,9 +14,11 @@ model Genre {
   name      String
   parentId  Int?    @map("parent_id")
   sortOrder Int     @default(0) @map("sort_order")
-  parent    Genre?  @relation("GenreParent", fields: [parentId], references: [id], onDelete: SetNull)
-  children  Genre[] @relation("GenreParent")
+  parent    Genre?      @relation("GenreParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Genre[]     @relation("GenreParent")
   charts    Chart[]
+  playlists Playlist[]
+  songs     SongGenre[]
 
   @@map("genres")
 }
@@ -37,8 +39,11 @@ model Song {
   primaryArtistId Int          @map("primary_artist_id")
   featuredArtists String?      @map("featured_artists") @db.Text
   releaseYear     Int?         @map("release_year")
-  primaryArtist   Artist       @relation(fields: [primaryArtistId], references: [id])
+  youtubeVideoId  String?      @map("youtube_video_id") @db.Text
+  primaryArtist   Artist          @relation(fields: [primaryArtistId], references: [id])
   entries         ChartEntry[]
+  playlistEntries PlaylistEntry[]
+  genres          SongGenre[]
 
   @@unique([titleNormalized, primaryArtistId])
   @@index([primaryArtistId])
@@ -49,6 +54,7 @@ model Chart {
   id              Int          @id @default(autoincrement())
   year            Int
   genreId         Int          @map("genre_id")
+  name            String       @map("name") @db.Text
   sourceName      String       @map("source_name") @db.Text
   sourceUrl       String?      @map("source_url") @db.Text
   isOfficial      Boolean      @map("is_official")
@@ -58,9 +64,48 @@ model Chart {
   genre           Genre        @relation(fields: [genreId], references: [id])
   entries         ChartEntry[]
 
-  @@unique([year, genreId])
+  @@unique([year, genreId, sourceName])
   @@index([genreId, year])
   @@map("charts")
+}
+
+model Playlist {
+  id        Int             @id @default(autoincrement())
+  genreId   Int             @map("genre_id")
+  year      Int
+  name      String
+  kind      String          @default("saved")
+  note      String?         @db.Text
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  genre     Genre           @relation(fields: [genreId], references: [id])
+  entries   PlaylistEntry[]
+
+  @@index([genreId, year])
+  @@map("playlists")
+}
+
+model PlaylistEntry {
+  id         Int      @id @default(autoincrement())
+  playlistId Int      @map("playlist_id")
+  position   Int
+  songId     Int      @map("song_id")
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song       Song     @relation(fields: [songId], references: [id])
+
+  @@unique([playlistId, songId])
+  @@unique([playlistId, position])
+  @@map("playlist_entries")
+}
+
+model SongGenre {
+  songId  Int   @map("song_id")
+  genreId Int   @map("genre_id")
+  song    Song  @relation(fields: [songId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([songId, genreId])
+  @@map("song_genres")
 }
 
 model ChartEntry {

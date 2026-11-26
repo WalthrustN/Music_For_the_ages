@@ -25,6 +25,22 @@ function publicGenre(genre: { id: number; slug: string; name: string; parentId: 
   }
 }
 
+function publicSong(song: {
+  id: number
+  title: string
+  featuredArtists: string | null
+  releaseYear: number | null
+  youtubeVideoId: string | null
+}) {
+  return {
+    id: song.id,
+    title: song.title,
+    featuredArtists: song.featuredArtists,
+    releaseYear: song.releaseYear,
+    youtubeVideoId: song.youtubeVideoId,
+  }
+}
+
 function appearance(entry: {
   rank: number
   song: { id: number; title: string; releaseYear: number | null }
@@ -74,38 +90,87 @@ export async function listCoverage(db: PrismaClient) {
 export async function getChart(db: PrismaClient, slug: string, year: number) {
   const genre = await db.genre.findUnique({ where: { slug } })
   if (!genre) return null
-  const chart = await db.chart.findUnique({
-    where: { year_genreId: { year, genreId: genre.id } },
-  })
-  if (!chart) {
-    return { genre: publicGenre(genre), chart: null, entries: [] as const }
+  const [charts, playlists] = await Promise.all([
+    db.chart.findMany({
+      where: { year, genreId: genre.id },
+      orderBy: { sourceName: 'asc' },
+      include: {
+        entries: {
+          orderBy: { rank: 'asc' },
+          include: { song: { include: { primaryArtist: true } } },
+        },
+      },
+    }),
+    db.playlist.findMany({
+      where: { year, genreId: genre.id },
+      orderBy: [{ kind: 'asc' }, { name: 'asc' }],
+      include: {
+        entries: {
+          orderBy: { position: 'asc' },
+          include: { song: { include: { primaryArtist: true } } },
+        },
+      },
+    }),
+  ])
+
+  const bySong = new Map<number, {
+    bestRank: number
+    song: { id: number; title: string; featuredArtists: string | null; releaseYear: number | null; youtubeVideoId: string | null }
+    artist: { id: number; name: string }
+    charts: { chartId: number; name: string; sourceName: string; rank: number; isOfficial: boolean }[]
+  }>()
+
+  for (const chart of charts) {
+    for (const entry of chart.entries) {
+      const existing = bySong.get(entry.song.id)
+      const appearance = {
+        chartId: chart.id,
+        name: chart.name,
+        sourceName: chart.sourceName,
+        rank: entry.rank,
+        isOfficial: chart.isOfficial,
+      }
+      if (!existing) {
+        bySong.set(entry.song.id, {
+          bestRank: entry.rank,
+          song: publicSong(entry.song),
+          artist: { id: entry.song.primaryArtist.id, name: entry.song.primaryArtist.name },
+          charts: [appearance],
+        })
+      } else {
+        existing.charts.push(appearance)
+        existing.bestRank = Math.min(existing.bestRank, entry.rank)
+      }
+    }
   }
-  const entries = await db.chartEntry.findMany({
-    where: { chartId: chart.id },
-    orderBy: { rank: 'asc' },
-    include: { song: { include: { primaryArtist: true } } },
-  })
+
+  const songs = [...bySong.values()].sort((a, b) => a.bestRank - b.bestRank || a.song.title.localeCompare(b.song.title))
+
   return {
     genre: publicGenre(genre),
-    chart: {
+    charts: charts.map((chart) => ({
       id: chart.id,
       year: chart.year,
+      name: chart.name,
       sourceName: chart.sourceName,
       sourceUrl: chart.sourceUrl,
       isOfficial: chart.isOfficial,
       methodologyNote: chart.methodologyNote,
-      entryCount: entries.length,
+      entryCount: chart.entries.length,
       updatedAt: chart.updatedAt.toISOString(),
-    },
-    entries: entries.map((entry) => ({
-      rank: entry.rank,
-      song: {
-        id: entry.song.id,
-        title: entry.song.title,
-        featuredArtists: entry.song.featuredArtists,
-        releaseYear: entry.song.releaseYear,
-      },
-      artist: { id: entry.song.primaryArtist.id, name: entry.song.primaryArtist.name },
+    })),
+    songs,
+    playlists: playlists.map((playlist) => ({
+      id: playlist.id,
+      name: playlist.name,
+      kind: playlist.kind,
+      note: playlist.note,
+      entryCount: playlist.entries.length,
+      entries: playlist.entries.map((entry) => ({
+        position: entry.position,
+        song: publicSong(entry.song),
+        artist: { id: entry.song.primaryArtist.id, name: entry.song.primaryArtist.name },
+      })),
     })),
   }
 }
@@ -243,6 +308,7 @@ export async function getSongDetail(db: PrismaClient, id: number) {
       featuredArtists: song.featuredArtists,
       releaseYear: song.releaseYear,
       artist: { id: song.primaryArtist.id, name: song.primaryArtist.name },
+      youtubeVideoId: song.youtubeVideoId,
     },
     appearances: songEntries.map(appearance),
     artistAppearances: artistEntries.map(appearance),
@@ -252,8 +318,11 @@ export async function getSongDetail(db: PrismaClient, id: number) {
 export async function compareYears(db: PrismaClient, genre: string, yearA: number, yearB: number) {
   const [left, right] = await Promise.all([getChart(db, genre, yearA), getChart(db, genre, yearB)])
   if (!left || !right) return { error: `Unknown genre "${genre}"` }
-  const missing = [left.chart ? null : yearA, right.chart ? null : yearB].filter((year): year is number => year != null)
-  if (missing.length > 0 || !left.chart || !right.chart) {
+  const missing = [
+    left.charts.length === 0 ? yearA : null,
+    right.charts.length === 0 ? yearB : null,
+  ].filter((year): year is number => year != null)
+  if (missing.length > 0) {
     return {
       genre,
       yearA,
@@ -261,28 +330,28 @@ export async function compareYears(db: PrismaClient, genre: string, yearA: numbe
       missing,
       common: [],
       added: [],
-      note: 'One or both charts are missing from the archive. Nothing below was guessed.',
+      note: 'One or both years have no chart in the archive. Nothing below was guessed.',
     }
   }
-  const bySong = new Map(left.entries.map((entry) => [entry.song.id, entry]))
+  const bySong = new Map(left.songs.map((entry) => [entry.song.id, entry]))
   const common = []
   const added = []
-  for (const entry of right.entries) {
+  for (const entry of right.songs) {
     const previous = bySong.get(entry.song.id)
     if (previous) {
       common.push({
         songId: entry.song.id,
         title: entry.song.title,
         artistName: entry.artist.name,
-        rankA: previous.rank,
-        rankB: entry.rank,
+        rankA: previous.bestRank,
+        rankB: entry.bestRank,
       })
     } else {
       added.push({
         songId: entry.song.id,
         title: entry.song.title,
         artistName: entry.artist.name,
-        rank: entry.rank,
+        rank: entry.bestRank,
       })
     }
   }

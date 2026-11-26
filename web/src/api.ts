@@ -27,6 +27,11 @@ export const api = {
     return request<{ results: SearchHit[] }>(`/api/search?${query.toString()}`)
   },
   song: (id: number) => request<SongDetail>(`/api/songs/${id}`),
+  setRecording: (id: number, youtubeVideoId: string | null) => request<{ id: number; youtubeVideoId: string | null }>(`/api/songs/${id}/recording`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ youtubeVideoId }),
+  }),
   artist: (id: number) => request<ArtistHistory>(`/api/artists/${id}/history`),
   assistant: (message: string, history: ChatTurn[]) => request<{ answer: string; action?: UiAction }>('/api/assistant', {
     method: 'POST',
@@ -35,5 +40,15 @@ export const api = {
       message,
       history: history.slice(-40).map((turn) => ({ role: turn.role, content: turn.content })),
     }),
+  }),
+  createPlaylist: (genre: string, year: number, name: string) => request<{ playlist: { id: number } }>('/api/playlists', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ genre, year, name }),
+  }),
+  addToPlaylist: (playlistId: number, body: { songId?: number; title?: string; artist?: string }) => request<{ songId: number; position: number }>(`/api/playlists/${playlistId}/songs`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
   }),
 }

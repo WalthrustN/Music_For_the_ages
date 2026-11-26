@@ -21,7 +21,7 @@ const argumentSchemas = {
     genre: z.string().optional(),
     year_from: year.optional(),
     year_to: year.optional(),
-    rank_max: z.number().int().min(1).max(100).optional(),
+    rank_max: z.number().int().min(1).optional(),
     limit: z.number().int().min(1).max(50).optional(),
   }),
   artist_history: z.object({ artist_name: z.string().min(1) }),

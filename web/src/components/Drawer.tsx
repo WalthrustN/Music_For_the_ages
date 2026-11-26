@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
-import { useEffect, useRef } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import type { Appearance } from '../types'
+import { parseYouTubeVideoId, thumbnailUrl } from '../youtube'
 
 function AppearanceList({
   rows,
@@ -39,12 +40,14 @@ export function Drawer({
   onClose,
   onOpenArtist,
   onOpenChart,
+  onPlay,
 }: {
   songId: number | null
   artistId: number | null
   onClose: () => void
   onOpenArtist: (id: number) => void
   onOpenChart: (genre: string, year: number, rank: number) => void
+  onPlay: (song: { songId: number; title: string; artist: string; videoId: string | null }) => void
 }) {
   const closeRef = useRef<HTMLButtonElement>(null)
   const open = songId != null || artistId != null
@@ -102,6 +105,13 @@ export function Drawer({
               {song.data.song.featuredArtists ? ` with ${song.data.song.featuredArtists}` : ''}
               {song.data.song.releaseYear ? ` · ${song.data.song.releaseYear}` : ''}
             </p>
+            <RecordingForm
+              songId={song.data.song.id}
+              title={song.data.song.title}
+              artist={song.data.song.artist.name}
+              videoId={song.data.song.youtubeVideoId}
+              onPlay={onPlay}
+            />
             <section>
               <h3 className="mb-2 text-sm uppercase tracking-[0.16em] text-gold">This song</h3>
               <AppearanceList
@@ -129,5 +139,103 @@ export function Drawer({
         ) : null}
       </aside>
     </div>
+  )
+}
+
+function RecordingForm({
+  songId,
+  title,
+  artist,
+  videoId,
+  onPlay,
+}: {
+  songId: number
+  title: string
+  artist: string
+  videoId: string | null
+  onPlay: (song: { songId: number; title: string; artist: string; videoId: string | null }) => void
+}) {
+  const queryClient = useQueryClient()
+  const [draft, setDraft] = useState('')
+  const [localError, setLocalError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setDraft(videoId ?? '')
+    setLocalError(null)
+  }, [songId, videoId])
+
+  const save = useMutation({
+    mutationFn: (next: string | null) => api.setRecording(songId, next),
+    onSuccess: async (result) => {
+      setLocalError(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['song', songId] }),
+        queryClient.invalidateQueries({ queryKey: ['chart'] }),
+      ])
+      onPlay({ songId, title, artist, videoId: result.youtubeVideoId })
+    },
+  })
+
+  function submit(next: string | null) {
+    if (next === null) {
+      setLocalError(null)
+      save.mutate(null)
+      return
+    }
+    const parsed = parseYouTubeVideoId(next)
+    if (!parsed) {
+      setLocalError('Paste a YouTube link or an 11-character video id.')
+      return
+    }
+    setLocalError(null)
+    save.mutate(parsed)
+  }
+
+  return (
+    <section>
+      <h3 className="mb-2 text-sm uppercase tracking-[0.16em] text-gold">Recording</h3>
+      {videoId ? (
+        <button
+          type="button"
+          className="mb-3 flex items-center gap-3 text-left"
+          onClick={() => onPlay({ songId, title, artist, videoId })}
+        >
+          <img src={thumbnailUrl(videoId)} alt="" className="h-12 w-20 rounded-md object-cover" />
+          <span className="text-sm text-ivory">Play this recording</span>
+        </button>
+      ) : (
+        <p className="mb-3 text-sm text-stone-300">No YouTube recording is linked yet.</p>
+      )}
+      <form
+        className="space-y-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          submit(draft)
+        }}
+      >
+        <label className="block text-sm" htmlFor="recording-link">YouTube link</label>
+        <input
+          id="recording-link"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="https://www.youtube.com/watch?v=…"
+          className="w-full rounded-xl border border-white/20 bg-black/40 px-3 py-2 text-sm text-ivory"
+        />
+        <p className="text-xs text-stone-400">The picture is YouTube’s thumbnail for that video. Replace the link if the recording is wrong.</p>
+        {localError || save.isError ? (
+          <p className="text-sm text-rose-200" role="alert">{localError || (save.error as Error).message}</p>
+        ) : null}
+        <div className="flex gap-2">
+          <button type="submit" className="rounded-full bg-amber-100 px-3 py-1.5 text-sm text-neutral-950" disabled={save.isPending}>
+            Save link
+          </button>
+          {videoId ? (
+            <button type="button" className="rounded-full border border-white/20 px-3 py-1.5 text-sm" disabled={save.isPending} onClick={() => submit(null)}>
+              Clear
+            </button>
+          ) : null}
+        </div>
+      </form>
+    </section>
   )
 }

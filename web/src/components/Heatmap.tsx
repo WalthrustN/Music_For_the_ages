@@ -2,7 +2,7 @@ import type { CoverageCell, Genre } from '../types'
 
 function shade(count: number): string {
   if (count <= 0) return 'rgba(255,255,255,0.06)'
-  const amount = 0.28 + (count / 100) * 0.72
+  const amount = 0.28 + (Math.min(count, 100) / 100) * 0.72
   return `rgba(228, 195, 154, ${amount.toFixed(3)})`
 }
 
@@ -33,10 +33,10 @@ export function Heatmap({
         <div className="flex items-center gap-2 text-xs text-stone-300">
           <span>0</span>
           <span className="h-3 w-24 rounded-full" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(228,195,154,1))' }} />
-          <span>100</span>
+          <span>100+</span>
         </div>
       </div>
-      <div className="scroll-thin min-h-0 flex-1 overflow-auto rounded-3xl border border-white/15 bg-neutral-950/75 p-2 backdrop-blur-xl">
+      <div className="panel-glass scroll-thin min-h-0 flex-1 overflow-auto rounded-3xl border border-white/15 p-2 backdrop-blur-xl">
         <table className="border-separate border-spacing-1">
           <caption className="sr-only">Songs on record for each genre and year. Choose a cell to open that chart.</caption>
           <thead>
@@ -61,7 +61,7 @@ export function Heatmap({
                   const selected = item.slug === genre && value === year
                   const label = count === 0
                     ? `${item.name} ${value}, no songs on record`
-                    : `${item.name} ${value}, ${count} of 100 songs${cell?.isOfficial ? ', official' : ''}`
+                    : `${item.name} ${value}, ${count} songs on the charts${cell?.isOfficial ? ', official' : ''}`
                   return (
                     <td key={value} className="p-0">
                       <button

@@ -42,25 +42,29 @@ describe('read API', () => {
     const jazz = rows.find((row) => row.genreSlug === 'jazz' && row.year === 1991)
     const soul = rows.find((row) => row.genreSlug === 'soul' && row.year === 1972)
     expect(jazz).toMatchObject({ entryCount: 0, isOfficial: null })
-    expect(soul).toMatchObject({ entryCount: 37, isOfficial: false })
+    expect(soul).toMatchObject({ entryCount: 10, isOfficial: true })
     expect(rows.some((row) => row.year === 1925)).toBe(true)
   })
 
   it('returns the soul 1972 chart in rank order', async () => {
     const response = await get('/api/charts/soul/1972')
     expect(response.status).toBe(200)
-    expect(response.body.chart.entryCount).toBe(37)
-    expect(response.body.chart.sourceName).toMatch(/Mock/)
-    expect(response.body.chart.sourceUrl).toBe('https://example.com/mock-soul-1972')
-    expect(response.body.entries[0].rank).toBe(1)
-    expect(response.body.entries[0].song.title).toMatch(/^Mock Song /)
-    expect(response.body.entries.at(-1).rank).toBe(37)
+    expect(response.body.charts).toHaveLength(1)
+    expect(response.body.charts[0].entryCount).toBe(10)
+    expect(response.body.charts[0].sourceName).toBe('Billboard year-end Best Selling Soul Singles')
+    expect(response.body.charts[0].isOfficial).toBe(true)
+    expect(response.body.songs).toHaveLength(10)
+    expect(response.body.songs[0].bestRank).toBe(1)
+    expect(response.body.songs[0].song.title).toBe("Let's Stay Together")
+    expect(response.body.songs[0].artist.name).toBe('Al Green')
+    expect(response.body.songs[0].song).toHaveProperty('youtubeVideoId')
+    expect(response.body.songs.at(-1).bestRank).toBe(10)
   })
 
   it('returns an empty chart for a year with no list', async () => {
     const response = await get('/api/charts/jazz/1991')
     expect(response.status).toBe(200)
-    expect(response.body).toMatchObject({ chart: null, entries: [] })
+    expect(response.body).toMatchObject({ charts: [], songs: [] })
   })
 
   it('rejects a search limit above 50 and finds a mock title', async () => {
@@ -73,9 +77,9 @@ describe('read API', () => {
   })
 
   it('returns song and artist history', async () => {
-    const chart = await get('/api/charts/soul/1965')
-    const songId = chart.body.entries[0].song.id as number
-    const artistId = chart.body.entries[0].artist.id as number
+    const chart = await get('/api/charts/blues/1965')
+    const songId = chart.body.songs[0].song.id as number
+    const artistId = chart.body.songs[0].artist.id as number
     const song = await get(`/api/songs/${songId}`)
     expect(song.status).toBe(200)
     expect(song.body.appearances.length).toBeGreaterThan(0)
@@ -104,15 +108,66 @@ describe('read-only tools', () => {
     const result = await executeTool(reader, 'compare_years', {
       genre: 'soul',
       year_a: 1972,
-      year_b: 2004,
+      year_b: 1980,
     }, ctx) as { common: unknown[]; added: unknown[]; missing: unknown[] }
     expect(result.missing).toEqual([])
-    expect(result.common.length + result.added.length).toBe(50)
+    expect(result.common.length + result.added.length).toBe(10)
   })
 
   it('reports the missing jazz year instead of inventing entries', async () => {
     const result = await executeTool(reader, 'get_chart', { genre: 'jazz', year: 1991 }, { lastSearch: null })
-    expect(result).toMatchObject({ chart: null, entries: [] })
+    expect(result).toMatchObject({ charts: [], songs: [] })
+  })
+})
+
+describe('recording link', () => {
+  const writer = new PrismaClient()
+  let base = ''
+  let songId = 0
+  let previous: string | null = null
+  const appPromise = buildApp({ db: reader, writer, whisperUrl: null, llm: null })
+
+  beforeAll(async () => {
+    const app = await appPromise
+    await app.listen({ port: 0, host: '127.0.0.1' })
+    const address = app.server.address() as AddressInfo
+    base = `http://127.0.0.1:${address.port}`
+    const chart = await fetch(`${base}/api/charts/soul/1972`)
+    const body = await chart.json() as { songs: { song: { id: number } }[] }
+    songId = body.songs[0].song.id
+    const row = await writer.song.findUnique({ where: { id: songId } })
+    previous = row?.youtubeVideoId ?? null
+  })
+
+  afterAll(async () => {
+    if (songId) await writer.song.update({ where: { id: songId }, data: { youtubeVideoId: previous } })
+    const app = await appPromise
+    await app.close()
+    await writer.$disconnect()
+  })
+
+  async function patch(youtubeVideoId: string | null) {
+    const response = await fetch(`${base}/api/songs/${songId}/recording`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ youtubeVideoId }),
+    })
+    const body = await response.json()
+    return { status: response.status, body }
+  }
+
+  it('stores a YouTube link and rejects a bad one', async () => {
+    const bad = await patch('nope')
+    expect(bad.status).toBe(400)
+    const saved = await patch('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    expect(saved.status).toBe(200)
+    expect(saved.body.youtubeVideoId).toBe('jNQXAC9IVRw')
+    const song = await fetch(`${base}/api/songs/${songId}`)
+    const detail = await song.json() as { song: { youtubeVideoId: string | null } }
+    expect(detail.song.youtubeVideoId).toBe('jNQXAC9IVRw')
+    const cleared = await patch(null)
+    expect(cleared.status).toBe(200)
+    expect(cleared.body.youtubeVideoId).toBeNull()
   })
 })
 

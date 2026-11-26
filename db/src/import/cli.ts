@@ -11,6 +11,13 @@ loadEnv()
 
 const FILE_NAME = /^([a-z0-9]+(?:-[a-z0-9]+)*)_(\d{4})\.csv$/i
 
+type FileSource = {
+  source?: string
+  url?: string
+  official?: boolean
+  note?: string
+}
+
 function repoRoot(): string {
   return resolve(import.meta.dirname, '../../..')
 }
@@ -21,6 +28,16 @@ export function resolveDataPath(input: string): string {
   const fromDb = resolve(repoRoot(), 'db', input)
   if (existsSync(fromDb)) return fromDb
   return direct
+}
+
+function readSources(dir: string): Record<string, FileSource> {
+  const path = resolve(dir, 'sources.json')
+  if (!existsSync(path)) return {}
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(`${path} must be an object keyed by filename.`)
+  }
+  return parsed as Record<string, FileSource>
 }
 
 function printErrors(label: string, result: ImportFailure): void {
@@ -34,10 +51,11 @@ function printErrors(label: string, result: ImportFailure): void {
 function printUsage(): void {
   console.log(`Usage:
   npm run import -- --file data/rnb_1965.csv --genre rnb --year 1965 --source "..." --official true --url "..."
-  npm run import -- --dir data/
+  npm run import -- --dir data/soul/
 
 CSV columns: rank,title,artist,featured_artists,release_year
-Bulk files must be named {genre}_{year}.csv.`)
+Bulk files must be named {genre}_{year}.csv.
+A sources.json file in that directory can set source, url, official, and note per file.`)
 }
 
 function parseOfficial(value: string | undefined, fallback: boolean | null): boolean | null {
@@ -57,6 +75,7 @@ async function main(): Promise<void> {
       source: { type: 'string' },
       official: { type: 'string' },
       url: { type: 'string' },
+      note: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
   })
@@ -97,6 +116,7 @@ async function main(): Promise<void> {
         sourceName: values.source,
         sourceUrl: values.url ?? null,
         isOfficial: official,
+        methodologyNote: values.note ?? null,
       })
       if (!result.ok) {
         printErrors(path, result)
@@ -119,6 +139,7 @@ async function main(): Promise<void> {
       console.error('--official must be true or false.')
       process.exit(1)
     }
+    const sources = readSources(dir)
     const files = readdirSync(dir)
       .filter((name) => FILE_NAME.test(name))
       .sort()
@@ -136,14 +157,18 @@ async function main(): Promise<void> {
         failed += 1
         continue
       }
+      const meta = sources[name] ?? {}
+      const sourceName = meta.source?.trim() || values.source?.trim() || `Imported from ${basename(name)}`
+      const isOfficial = meta.official ?? official
       const path = resolve(dir, name)
       const result = await importChart(prisma, {
         csvText: readFileSync(path, 'utf8'),
         genreSlug,
         year,
-        sourceName: values.source?.trim() || `Imported from ${basename(name)}`,
-        sourceUrl: values.url ?? null,
-        isOfficial: official,
+        sourceName,
+        sourceUrl: meta.url ?? values.url ?? null,
+        isOfficial,
+        methodologyNote: meta.note ?? values.note ?? null,
       })
       if (!result.ok) {
         printErrors(name, result)

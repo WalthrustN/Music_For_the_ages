@@ -40,12 +40,11 @@ describe('parseCsv', () => {
     expect(parsed.ok).toBe(false)
     if (parsed.ok) return
     const messages = parsed.errors.map((error) => error.message).join(' | ')
-    expect(messages).toMatch(/outside 1/)
+    expect(messages).toMatch(/must be 1 or greater/)
     expect(messages).toMatch(/title is required/)
     expect(messages).toMatch(/duplicate rank 2/)
     expect(messages).toMatch(/artist is required/)
     expect(messages).toMatch(/duplicate song/)
-    expect(messages).toMatch(/outside 1–100/)
   })
 
   it('rejects a missing header', () => {
@@ -114,7 +113,7 @@ describe('importChart', () => {
       csvText: csv(['4,Import Test Song 9,Import Test Artist,,2097']),
       genreSlug: 'rnb',
       year: 2098,
-      sourceName: 'Import test list replaced',
+      sourceName: 'Import test list',
       isOfficial: false,
     })
     expect(replaced.ok).toBe(true)
@@ -126,6 +125,17 @@ describe('importChart', () => {
     expect(next.entries[0]?.rank).toBe(4)
     expect(next.entries[0]?.song.title).toBe('Import Test Song 9')
     expect(next.isOfficial).toBe(false)
+
+    const second = await importChart(prisma, {
+      csvText: csv(['1,Import Test Song 8,Import Test Artist,,2098']),
+      genreSlug: 'rnb',
+      year: 2098,
+      sourceName: 'Second R&B list',
+      isOfficial: true,
+    })
+    expect(second.ok).toBe(true)
+    const charts = await prisma.chart.findMany({ where: { year: 2098, genre: { slug: 'rnb' } } })
+    expect(charts).toHaveLength(2)
   })
 })
 

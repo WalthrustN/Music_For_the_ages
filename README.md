@@ -1,6 +1,6 @@
 # Music for the Ages
 
-A local archive of music charts: one ranked list per genre per year, from 1925 through the current year, up to 100 songs each. Empty years stay empty. The app never invents rankings. The database starts with obviously fake mock songs (`Mock Song 12`, `Mock Artist B`). Real lists are added later with the CSV importer.
+A local archive of music charts from 1925 through the current year. A genre can hold more than one chart in the same year, and a chart is not capped at 100 songs. Songs that show up on more than one chart that year are listed once. Each year can also have saved lists: a song on a list has to be from that year and filed under that genre. Empty years stay empty. Jazz and blues still start from obviously fake mock songs (`Mock Song 12`, `Mock Artist B`). Soul charts for 1960–1982 are imported from `db/data/soul/`. Influential soul listening lists are labeled as listening lists, not charts.
 
 ## What you need
 
@@ -37,7 +37,7 @@ CSV columns, in this order:
 rank,title,artist,featured_artists,release_year
 ```
 
-Ranks must be whole numbers from 1 to 100, with no duplicate ranks and no duplicate song for the same artist. If any row fails, the command prints the problems and writes nothing.
+Ranks must be whole numbers starting at 1, with no duplicate ranks and no duplicate song for the same artist. There is no maximum length. If any row fails, the command prints the problems and writes nothing. Importing the same genre, year, and source again replaces that chart and leaves other charts for the year alone.
 
 ```bash
 npm run import -- --file data/rnb_1965.csv --genre rnb --year 1965 --source "Mock R&B year-end list" --official false
@@ -46,10 +46,10 @@ npm run import -- --file data/rnb_1965.csv --genre rnb --year 1965 --source "Moc
 `--url` is optional. A file named `{genre}_{year}.csv` can also be imported in bulk:
 
 ```bash
-npm run import -- --dir data/
+npm run import -- --dir data/soul
 ```
 
-Bulk import uses the genre and year in the filename. Pass `--source` or `--official` to apply them to every file; otherwise each file is recorded as a compiled list whose source is the filename. Example files live in `db/data/` and contain mock titles only. Importing `soul_1972.csv` replaces the seeded Soul 1972 chart.
+Bulk import uses the genre and year in the filename. Pass `--source` or `--official` to apply them to every file; otherwise each file is recorded as a compiled list whose source is the filename. A `sources.json` file in the directory can set the source, URL, official flag, and note for each file. Example files in `db/data/` contain mock titles only. Real soul lists for 1960–1982 live in `db/data/soul/`. Importing one of those files again replaces that year's list.
 
 Matching is normalized: lower case, punctuation removed, spacing collapsed. Re-importing a year replaces that chart's rows in one transaction and upserts artists and songs.
 

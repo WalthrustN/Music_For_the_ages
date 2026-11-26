@@ -91,18 +91,25 @@ export async function importChart(
       songIds.push({ rank: row.rank, songId: song.id })
     }
 
+    await tx.songGenre.createMany({
+      data: songIds.map((entry) => ({ songId: entry.songId, genreId: genre.id })),
+      skipDuplicates: true,
+    })
+
+    const sourceName = input.sourceName.trim()
     const chart = await tx.chart.upsert({
-      where: { year_genreId: { year: input.year, genreId: genre.id } },
+      where: { year_genreId_sourceName: { year: input.year, genreId: genre.id, sourceName } },
       create: {
         year: input.year,
         genreId: genre.id,
-        sourceName: input.sourceName.trim(),
+        name: sourceName,
+        sourceName,
         sourceUrl: input.sourceUrl?.trim() || null,
         isOfficial: input.isOfficial,
         methodologyNote: input.methodologyNote ?? null,
       },
       update: {
-        sourceName: input.sourceName.trim(),
+        name: sourceName,
         sourceUrl: input.sourceUrl?.trim() || null,
         isOfficial: input.isOfficial,
         methodologyNote: input.methodologyNote ?? null,
