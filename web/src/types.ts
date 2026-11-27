@@ -110,6 +110,16 @@ export type UiAction =
   | { type: 'showResults'; results: SearchHit[] }
   | { type: 'scrollToRank'; rank: number }
   | { type: 'showArtist'; artistId: number }
+  | {
+      type: 'playSong'
+      songId: number
+      title: string
+      artist: string
+      videoId: string | null
+      genre?: string
+      year?: number
+      rank?: number
+    }
 
 export type ChatTurn = {
   role: 'user' | 'assistant'

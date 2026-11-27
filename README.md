@@ -1,6 +1,6 @@
 # Music for the Ages
 
-A local archive of music charts from 1925 through the current year. A genre can hold more than one chart in the same year, and a chart is not capped at 100 songs. Songs that show up on more than one chart that year are listed once. Each year can also have saved lists: a song on a list has to be from that year and filed under that genre. Empty years stay empty. Jazz and blues still start from obviously fake mock songs (`Mock Song 12`, `Mock Artist B`). Soul charts for 1960–1982 are imported from `db/data/soul/`. Influential soul listening lists are labeled as listening lists, not charts.
+A local archive of music charts from 1880 through the current year. A genre can hold more than one chart in the same year, and a chart is not capped at 100 songs. Songs that show up on more than one chart that year are listed once. Each year can also have saved lists: a song on a list has to be from that year and filed under that genre. Empty years stay empty. Later jazz years still start from obviously fake mock songs (`Mock Song 12`, `Mock Artist B`). Later blues years do too. Ethel Waters and Duke Ellington are in `db/data/jazz/`, and her 1921 blues sides are in `db/data/blues/`. A compiled list of 25 essential blues songs from the 1920s lives in `db/data/blues/`. Soul lists for 1950–1982 are imported from `db/data/soul/`. Influential soul listening lists are labeled as listening lists, not charts.
 
 ## What you need
 
@@ -49,7 +49,7 @@ npm run import -- --file data/rnb_1965.csv --genre rnb --year 1965 --source "Moc
 npm run import -- --dir data/soul
 ```
 
-Bulk import uses the genre and year in the filename. Pass `--source` or `--official` to apply them to every file; otherwise each file is recorded as a compiled list whose source is the filename. A `sources.json` file in the directory can set the source, URL, official flag, and note for each file. Example files in `db/data/` contain mock titles only. Real soul lists for 1960–1982 live in `db/data/soul/`. Importing one of those files again replaces that year's list.
+Bulk import uses the genre and year in the filename. Pass `--source` or `--official` to apply them to every file; otherwise each file is recorded as a compiled list whose source is the filename. A `sources.json` file in the directory can set the source, URL, official flag, and note for each file. Example files in `db/data/` contain mock titles only. Real soul lists for 1950–1982 live in `db/data/soul/`. Importing one of those files again replaces that year's list.
 
 Matching is normalized: lower case, punctuation removed, spacing collapsed. Re-importing a year replaces that chart's rows in one transaction and upserts artists and songs.
 

@@ -22,7 +22,7 @@ type NowPlaying = {
   videoId: string
 }
 
-const YEAR_MIN = 1925
+const YEAR_MIN = 1880
 
 export function App() {
   const genresQuery = useQuery({ queryKey: ['genres'], queryFn: api.genres })
@@ -114,6 +114,21 @@ export function App() {
     } else if (action.type === 'showArtist') {
       setArtistId(action.artistId)
       setSongId(null)
+    } else if (action.type === 'playSong') {
+      if (action.genre) setGenre(action.genre)
+      if (action.year) setYear(Math.min(maxYear, Math.max(YEAR_MIN, action.year)))
+      setHighlightRank(action.rank ?? null)
+      setView('chart')
+      setSongId(null)
+      setArtistId(null)
+      if (action.videoId) {
+        setPlaying({
+          songId: action.songId,
+          title: action.title,
+          artist: action.artist,
+          videoId: action.videoId,
+        })
+      }
     }
   }
 

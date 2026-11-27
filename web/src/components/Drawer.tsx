@@ -85,7 +85,7 @@ export function Drawer({
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
-        className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-white/15 bg-neutral-950/90 p-5 shadow-2xl backdrop-blur-xl"
+        className="panel-blur relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-white/15 bg-neutral-950/90 p-5 shadow-2xl"
       >
         <div className="flex items-start justify-between gap-3">
           <h2 id="drawer-title" className="font-serif text-3xl text-ivory">{loading ? 'Loading…' : title}</h2>

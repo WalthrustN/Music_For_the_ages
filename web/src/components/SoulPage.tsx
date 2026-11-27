@@ -4,13 +4,13 @@ const ERAS: {
   open: { genre: string; year: number; label: string } | null
 }[] = [
   {
-    years: 'Before 1954',
-    text: 'There is no soul repertoire yet. Gospel, blues, and rhythm and blues are the parent styles. This archive leaves those years empty instead of borrowing them.',
-    open: null,
+    years: '1950–1953',
+    text: 'Clyde McPhatter sings lead with the Dominoes, then forms the Drifters. The "5" Royales come out of gospel in Winston-Salem. These years hold their rhythm-and-blues top 10s, in the year each single came out. The rest of early rhythm and blues stays in that genre.',
+    open: { genre: 'soul', year: 1950, label: 'Show 1950' },
   },
   {
     years: '1954–1959',
-    text: 'Ray Charles puts a gospel voice on rhythm-and-blues rhythm. Sam Cooke, James Brown, and Jackie Wilson follow. The records are still filed as R&B.',
+    text: 'Ray Charles puts a gospel voice on rhythm-and-blues rhythm with “I Got a Woman.” Sam Cooke, James Brown, and Jackie Wilson follow. The year’s list is still a compiled set of singles, filed by release date.',
     open: { genre: 'soul', year: 1954, label: 'Show 1954' },
   },
   {
@@ -37,11 +37,11 @@ export function SoulPage({
 }) {
   return (
     <main className="scroll-thin min-h-0 flex-1 overflow-y-auto px-3 pb-24 sm:px-5">
-      <article className="panel-glass mx-auto max-w-3xl rounded-3xl border border-white/15 p-5 backdrop-blur-xl sm:p-8">
+      <article className="panel-glass mx-auto max-w-3xl rounded-3xl border border-white/15 p-5 sm:p-8">
         <p className="text-xs uppercase tracking-[0.2em] text-gold">Soul</p>
         <h2 id="soul-heading" className="mt-2 font-serif text-4xl text-ivory">How this archive draws the line</h2>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-200">
-          Soul here runs from the first gospel-voiced rhythm-and-blues records of the mid-1950s through Billboard’s soul chart, which ends in June 1982. Years before that stay empty. Charts after that rename are filed under R&B and rap.
+          Soul here runs from Clyde McPhatter’s first hit in 1950 and the “5” Royales through Billboard’s soul chart, which ends in June 1982. Early years are compiled from rhythm-and-blues top 10s and placed in the year the single was released. Charts after the 1982 rename are filed under R&B and rap.
         </p>
         <h3 className="mt-8 font-serif text-2xl text-ivory">Timeline</h3>
         <ol className="mt-4 border-l border-gold/40">

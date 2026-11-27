@@ -36,7 +36,7 @@ export function Heatmap({
           <span>100+</span>
         </div>
       </div>
-      <div className="panel-glass scroll-thin min-h-0 flex-1 overflow-auto rounded-3xl border border-white/15 p-2 backdrop-blur-xl">
+      <div className="panel-glass scroll-thin min-h-0 flex-1 overflow-auto rounded-3xl border border-white/15 p-2">
         <table className="border-separate border-spacing-1">
           <caption className="sr-only">Songs on record for each genre and year. Choose a cell to open that chart.</caption>
           <thead>

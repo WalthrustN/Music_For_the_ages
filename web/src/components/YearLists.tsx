@@ -53,7 +53,7 @@ export function YearLists({
   const eligible = charted.filter((row) => row.song.releaseYear === year)
 
   return (
-    <section className="panel-glass flex max-h-full min-h-0 w-full flex-col gap-3 overflow-y-auto rounded-3xl border border-white/15 p-4 backdrop-blur-xl lg:w-80" aria-labelledby="lists-heading">
+    <section className="panel-glass flex max-h-full min-h-0 w-full flex-col gap-3 overflow-y-auto rounded-3xl border border-white/15 p-4 lg:w-80" aria-labelledby="lists-heading">
       <div>
         <h2 id="lists-heading" className="font-serif text-2xl">Lists for {year}</h2>
         <p className="mt-1 text-sm text-stone-300">A saved song has to be {genreName} from {year}. Chart position is not required. The same song is kept once.</p>

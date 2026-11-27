@@ -5,7 +5,13 @@ export function useSettings() {
   const [settings, setSettings] = useState<ArchiveSettings>(readSettings)
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--panel-alpha', String(settings.panelAlpha))
+    const root = document.documentElement.style
+    root.setProperty('--panel-alpha', String(settings.panelAlpha))
+    root.setProperty('--panel-blur', `${settings.panelBlur}px`)
+    root.setProperty('--panel-brightness', `${settings.panelBrightness}%`)
+    root.setProperty('--panel-contrast', `${settings.panelContrast}%`)
+    root.setProperty('--panel-saturate', `${settings.panelSaturate}%`)
+    root.setProperty('--panel-grayscale', `${settings.panelGrayscale}%`)
     writeSettings(settings)
   }, [settings])
 

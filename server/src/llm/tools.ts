@@ -5,13 +5,14 @@ import {
   findArtistsByName,
   getArtistHistory,
   getChart,
+  getSongDetail,
   listCoverage,
   searchSongs,
   type SearchHit,
 } from '../queries.js'
 import type { ToolDefinition } from './types.js'
 
-const year = z.number().int().min(1925).max(2100)
+const year = z.number().int().min(1880).max(2100)
 
 const argumentSchemas = {
   get_chart: z.object({ genre: z.string().min(1), year }),
@@ -35,6 +36,10 @@ const argumentSchemas = {
       type: z.literal('showArtist'),
       artistId: z.number().int().positive().optional(),
       artistName: z.string().min(1).optional(),
+    }),
+    z.object({
+      type: z.literal('playSong'),
+      songId: z.coerce.number().int().positive(),
     }),
   ]),
 }
@@ -89,14 +94,15 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'set_ui_action',
-    description: 'Ask the screen to show a chart, the last search, a rank, or an artist. This does not query the database except to resolve an artist name.',
+    description: 'Ask the screen to show a chart, the last search, a rank, an artist, or to play a song. playSong looks the song up by songId from search_songs or song.id from get_chart and starts that recording when the archive has one.',
     parameters: objectSchema({
-      type: { type: 'string', enum: ['showChart', 'showResults', 'scrollToRank', 'showArtist'] },
+      type: { type: 'string', enum: ['showChart', 'showResults', 'scrollToRank', 'showArtist', 'playSong'] },
       genre: { type: 'string' },
       year: { type: 'integer' },
       rank: { type: 'integer' },
       artistId: { type: 'integer' },
       artistName: { type: 'string' },
+      songId: { type: 'integer', description: 'songId from search_songs, or song.id from get_chart' },
     }, ['type']),
   },
 ]
@@ -106,11 +112,57 @@ export type UiAction =
   | { type: 'showResults'; results: SearchHit[] }
   | { type: 'scrollToRank'; rank: number }
   | { type: 'showArtist'; artistId: number }
+  | {
+      type: 'playSong'
+      songId: number
+      title: string
+      artist: string
+      videoId: string | null
+      genre?: string
+      year?: number
+      rank?: number
+    }
 
 export type ToolContext = {
   lastSearch: SearchHit[] | null
   action?: UiAction
   rank?: number
+}
+
+const PLAY_VERB = /\b(play|hear|put on|listen to)\b/i
+const QUESTION = /\b(who|what|when|where|why|which|how|compare|empty|coverage|list|show|about|history)\b/i
+
+export function messageAsksToPlay(message: string): boolean {
+  const text = message.trim()
+  if (PLAY_VERB.test(text)) return true
+  if (text.includes('?') || QUESTION.test(text)) return false
+  const words = text.split(/\s+/).filter(Boolean)
+  return words.length > 0 && words.length <= 6
+}
+
+export function playQuery(message: string): string | null {
+  if (!messageAsksToPlay(message)) return null
+  const stripped = message
+    .replace(/\b(please|play|hear|put on|listen to)\b/gi, ' ')
+    .replace(/[^a-z0-9\s']/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (stripped.length < 2 || /^(it|that|this|one|the one|that one|this one)$/i.test(stripped)) return null
+  return stripped
+}
+
+export function answerForPlayback(answer: string, action: UiAction | undefined, finishedPlay: boolean): string {
+  if (action?.type !== 'playSong') return answer
+  const where = action.year ? ` from ${action.year}` : ''
+  const playing = `Playing "${action.title}" by ${action.artist}${where}.`
+  const missing = `The archive has "${action.title}" by ${action.artist}${where}, but there is no recording to play.`
+  const deniesRecording = /no recording|cannot play|can't play|could not find a recording/i.test(answer)
+  if (action.videoId) {
+    if (finishedPlay || !answer.trim() || deniesRecording) return playing
+    return answer
+  }
+  if (finishedPlay || !answer.trim() || !deniesRecording) return missing
+  return answer
 }
 
 export function parseToolArgs(name: string, raw: unknown): { ok: true; data: unknown } | { ok: false; error: string } {
@@ -154,7 +206,10 @@ export async function executeTool(
       limit: args.limit ?? 20,
     })
     ctx.lastSearch = results
-    return { results }
+    return {
+      results,
+      note: 'These rows do not say if a recording exists. To play one, call set_ui_action playSong with its songId.',
+    }
   }
 
   if (name === 'artist_history') {
@@ -213,6 +268,20 @@ export async function executeTool(
         ctx.action = { type: 'scrollToRank', rank: args.rank }
       }
       return { ok: true, action: ctx.action }
+    }
+    if (args.type === 'playSong') {
+      const song = await getSongDetail(db, args.songId)
+      if (!song) return { error: `No song with id ${args.songId}` }
+      const best = [...song.appearances].sort((a, b) => a.rank - b.rank || b.year - a.year)[0]
+      ctx.action = {
+        type: 'playSong',
+        songId: song.song.id,
+        title: song.song.title,
+        artist: song.song.artist.name,
+        videoId: song.song.youtubeVideoId,
+        ...(best ? { genre: best.genreSlug, year: best.year, rank: best.rank } : {}),
+      }
+      return { ok: true, action: ctx.action, hasRecording: Boolean(song.song.youtubeVideoId) }
     }
     if (args.artistId) {
       const history = await getArtistHistory(db, args.artistId)

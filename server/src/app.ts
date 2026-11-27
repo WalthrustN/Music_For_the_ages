@@ -4,7 +4,7 @@ import Fastify, { type FastifyReply } from 'fastify'
 import { z, type ZodType } from 'zod'
 import { runAssistant } from './llm/loop.js'
 import { systemPrompt } from './llm/prompt.js'
-import { executeTool, TOOL_DEFINITIONS, type ToolContext } from './llm/tools.js'
+import { answerForPlayback, executeTool, messageAsksToPlay, playQuery, TOOL_DEFINITIONS, type ToolContext } from './llm/tools.js'
 import type { LLMClient } from './llm/types.js'
 import { addSongToPlaylist, createPlaylist } from './playlists.js'
 import { parseYouTubeVideoId } from './youtube.js'
@@ -25,7 +25,7 @@ export type AppDeps = {
   logTools?: boolean
 }
 
-const yearParam = z.coerce.number().int().min(1925).max(2100)
+const yearParam = z.coerce.number().int().min(1880).max(2100)
 
 function parseOr400<T>(schema: ZodType<T>, value: unknown, reply: FastifyReply): T | null {
   const parsed = schema.safeParse(value)
@@ -145,7 +145,7 @@ export async function buildApp(deps: AppDeps) {
     const body = parseOr400(
       z.object({
         genre: z.string().min(1),
-        year: z.number().int().min(1925).max(2100),
+        year: z.number().int().min(1880).max(2100),
         name: z.string().trim().min(1).max(120),
       }),
       request.body,
@@ -193,17 +193,51 @@ export async function buildApp(deps: AppDeps) {
     if (!body) return
     const genres = await listGenres(deps.db)
     const ctx: ToolContext = { lastSearch: null }
-    const result = await runAssistant({
-      client: deps.llm,
-      system: systemPrompt(genres),
-      message: body.message,
-      history: body.history ?? [],
-      tools: TOOL_DEFINITIONS,
-      getAction: () => ctx.action,
-      log: deps.logTools ? (line) => console.log(line) : undefined,
-      execute: (name, args) => executeTool(deps.db, name, args, ctx),
-    })
-    return { answer: result.answer, action: result.action }
+    const query = playQuery(body.message)
+    if (query) {
+      const results = await searchSongs(deps.db, { text: query, limit: 5 })
+      if (results.length > 0) {
+        ctx.lastSearch = results
+        await executeTool(deps.db, 'set_ui_action', { type: 'playSong', songId: results[0].songId }, ctx)
+        if (ctx.action?.type === 'playSong') {
+          return { answer: answerForPlayback('', ctx.action, true), action: ctx.action }
+        }
+      }
+    }
+    try {
+      const result = await runAssistant({
+        client: deps.llm,
+        system: systemPrompt(genres),
+        message: body.message,
+        history: body.history ?? [],
+        tools: TOOL_DEFINITIONS,
+        getAction: () => ctx.action,
+        log: deps.logTools ? (line) => console.log(line) : undefined,
+        execute: (name, args) => executeTool(deps.db, name, args, ctx),
+      })
+      let finishedPlay = false
+      if (result.action?.type !== 'playSong' && messageAsksToPlay(body.message) && ctx.lastSearch?.length) {
+        await executeTool(deps.db, 'set_ui_action', { type: 'playSong', songId: ctx.lastSearch[0].songId }, ctx)
+        finishedPlay = ctx.action?.type === 'playSong'
+      }
+      return {
+        answer: answerForPlayback(result.answer, ctx.action, finishedPlay),
+        action: ctx.action ?? result.action,
+      }
+    } catch (error) {
+      const cause = error instanceof Error ? error.cause : undefined
+      const detail = [
+        error instanceof Error ? error.message : '',
+        cause instanceof Error ? cause.message : '',
+        cause && typeof cause === 'object' && 'code' in cause ? String(cause.code) : '',
+      ].join(' ')
+      if (/ECONNREFUSED|ENOTFOUND|EAI_AGAIN|fetch failed/i.test(detail)) {
+        return reply.code(503).send({
+          error: 'The archivist cannot reach Ollama. Start Ollama, then try again.',
+        })
+      }
+      throw error
+    }
   })
 
   app.post('/api/transcribe', async (request, reply) => {

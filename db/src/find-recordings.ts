@@ -33,11 +33,13 @@ function songs(): { title: string; artist: string }[] {
     seen.add(key)
     rows.push({ title, artist })
   }
-  const dir = join(root, 'data', 'soul')
-  for (const name of readdirSync(dir)) {
-    if (!name.endsWith('.csv')) continue
-    const table = parse(readFileSync(join(dir, name)), { columns: true, skip_empty_lines: true }) as { title: string; artist: string }[]
-    for (const row of table) add(row.title, row.artist)
+  for (const folder of ['soul', 'blues', 'jazz']) {
+    const dir = join(root, 'data', folder)
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith('.csv')) continue
+      const table = parse(readFileSync(join(dir, name)), { columns: true, skip_empty_lines: true }) as { title: string; artist: string }[]
+      for (const row of table) add(row.title, row.artist)
+    }
   }
   for (const year of SOUL_LISTENING) {
     for (const song of year.songs) add(song.title, song.artist)

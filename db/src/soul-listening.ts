@@ -3,33 +3,77 @@ import { normalize } from './normalize.js'
 
 const NOTE = 'A listening list, not a chart. These are influential soul records released this year. Positions are listening order. Years with fewer than 20 songs are not padded.'
 
-/** Soul as a style starts in the mid-1950s. Earlier years are left empty on purpose. */
+/** Proto-soul begins in 1950 with Clyde McPhatter. Years before that stay empty. */
 export const SOUL_LISTENING: { year: number; songs: { title: string; artist: string }[] }[] = [
-  { year: 1954, songs: [{ title: 'I Got a Woman', artist: 'Ray Charles' }] },
+  { year: 1950, songs: [{ title: 'Do Something for Me', artist: 'The Dominoes' }] },
+  { year: 1951, songs: [{ title: 'I Am with You', artist: 'The Dominoes' }] },
+  { year: 1952, songs: [
+    { title: "That's What You're Doing to Me", artist: 'The Dominoes' },
+    { title: 'Have Mercy Baby', artist: 'The Dominoes' },
+    { title: "I'd Be Satisfied", artist: 'Billy Ward and His Dominoes' },
+    { title: "Baby Don't Do It", artist: 'The "5" Royales' },
+    { title: 'The Bells', artist: 'Billy Ward and His Dominoes' },
+  ] },
+  { year: 1953, songs: [
+    { title: 'Help Me Somebody', artist: 'The "5" Royales' },
+    { title: 'Crazy, Crazy, Crazy', artist: 'The "5" Royales' },
+    { title: 'These Foolish Things', artist: 'Billy Ward and His Dominoes' },
+    { title: "Too Much Lovin' (Much Too Much)", artist: 'The "5" Royales' },
+    { title: 'Money Honey', artist: 'Clyde McPhatter and the Drifters' },
+  ] },
+  { year: 1954, songs: [
+    { title: 'I Do', artist: 'The "5" Royales' },
+    { title: 'Lucille', artist: 'Clyde McPhatter and the Drifters' },
+    { title: 'Such a Night', artist: 'Clyde McPhatter and the Drifters' },
+    { title: 'Honey Love', artist: 'Clyde McPhatter and the Drifters' },
+    { title: 'Bip Bam', artist: 'Clyde McPhatter and the Drifters' },
+    { title: 'White Christmas', artist: 'Clyde McPhatter and the Drifters' },
+    { title: 'I Got a Woman', artist: 'Ray Charles' },
+  ] },
   { year: 1955, songs: [
+    { title: "What'cha Gonna Do", artist: 'Clyde McPhatter and the Drifters' },
     { title: 'A Fool for You', artist: 'Ray Charles' },
     { title: 'This Little Girl of Mine', artist: 'Ray Charles' },
+    { title: 'Love Has Joined Us Together', artist: 'Clyde McPhatter and Ruth Brown' },
+    { title: 'Seven Days', artist: 'Clyde McPhatter' },
   ] },
   { year: 1956, songs: [
-    { title: 'Hallelujah I Love Her So', artist: 'Ray Charles' },
     { title: 'Please, Please, Please', artist: 'James Brown and the Famous Flames' },
+    { title: 'Treasure of Love', artist: 'Clyde McPhatter' },
+    { title: 'Hallelujah I Love Her So', artist: 'Ray Charles' },
+    { title: 'Without Love (There Is Nothing)', artist: 'Clyde McPhatter' },
   ] },
-  { year: 1957, songs: [{ title: 'You Send Me', artist: 'Sam Cooke' }] },
-  { year: 1958, songs: [{ title: 'Lonely Teardrops', artist: 'Jackie Wilson' }] },
+  { year: 1957, songs: [
+    { title: 'Just to Hold My Hand', artist: 'Clyde McPhatter' },
+    { title: 'Tears of Joy', artist: 'The "5" Royales' },
+    { title: 'Think', artist: 'The "5" Royales' },
+    { title: 'Long Lonely Nights', artist: 'Clyde McPhatter' },
+    { title: 'You Send Me', artist: 'Sam Cooke' },
+  ] },
+  { year: 1958, songs: [
+    { title: 'Come What May', artist: 'Clyde McPhatter' },
+    { title: "A Lover's Question", artist: 'Clyde McPhatter' },
+    { title: 'Lonely Teardrops', artist: 'Jackie Wilson' },
+  ] },
   { year: 1959, songs: [
     { title: "What'd I Say", artist: 'Ray Charles' },
     { title: 'Shout', artist: 'The Isley Brothers' },
   ] },
-  { year: 1960, songs: [{ title: 'Chain Gang', artist: 'Sam Cooke' }] },
+  { year: 1960, songs: [
+    { title: 'Chain Gang', artist: 'Sam Cooke' },
+    { title: 'Ta Ta', artist: 'Clyde McPhatter' },
+  ] },
   { year: 1961, songs: [{ title: 'Stand By Me', artist: 'Ben E. King' }] },
   { year: 1962, songs: [
     { title: 'Green Onions', artist: "Booker T. and the M.G.'s" },
     { title: 'Bring It On Home to Me', artist: 'Sam Cooke' },
     { title: 'Cry to Me', artist: 'Solomon Burke' },
+    { title: 'Lover Please', artist: 'Clyde McPhatter' },
   ] },
   { year: 1963, songs: [
     { title: 'Heat Wave', artist: 'Martha and the Vandellas' },
     { title: 'Cry Baby', artist: 'Garnet Mimms and the Enchanters' },
+    { title: 'Deep in the Heart of Harlem', artist: 'Clyde McPhatter' },
   ] },
   { year: 1964, songs: [
     { title: 'A Change Is Gonna Come', artist: 'Sam Cooke' },
@@ -152,5 +196,5 @@ export async function seedSoulListening(prisma: PrismaClient): Promise<void> {
       })),
     })
   }
-  console.log(`Seeded influential soul lists for ${SOUL_LISTENING.length} years. Soul before 1954 is left empty.`)
+  console.log(`Seeded influential soul lists for ${SOUL_LISTENING.length} years. Proto-soul begins in 1950.`)
 }

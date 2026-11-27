@@ -2,7 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useId, useState, type RefObject } from 'react'
 import { api } from '../api'
 import type { ArchiveSettings, PlayerSide } from '../settings'
-import { PANEL_ALPHA_MAX, PANEL_ALPHA_MIN } from '../settings'
+import {
+  PANEL_ALPHA_MAX,
+  PANEL_ALPHA_MIN,
+  PANEL_BLUR_MAX,
+  PANEL_BLUR_MIN,
+  PANEL_GRAYSCALE_MAX,
+  PANEL_GRAYSCALE_MIN,
+  PANEL_TONE_MAX,
+  PANEL_TONE_MIN,
+} from '../settings'
 import type { Genre, SearchHit } from '../types'
 
 export function TopBar({
@@ -169,6 +178,42 @@ export function TopBar({
   )
 }
 
+function FilterSlider({
+  id,
+  label,
+  value,
+  min,
+  max,
+  suffix,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: number
+  min: number
+  max: number
+  suffix: string
+  onChange: (value: number) => void
+}) {
+  return (
+    <>
+      <label className="mt-4 block text-sm" htmlFor={id}>
+        {label} <span className="text-stone-300">{value}{suffix}</span>
+      </label>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="mt-2 w-full accent-amber-100"
+      />
+    </>
+  )
+}
+
 function SettingsPanel({
   settings,
   onSettings,
@@ -179,7 +224,7 @@ function SettingsPanel({
   onClose: () => void
 }) {
   return (
-    <div className="absolute right-0 top-12 z-40 w-72 rounded-2xl border border-white/15 bg-neutral-950/95 p-4 shadow-2xl" id="archive-settings">
+    <div className="scroll-thin absolute right-0 top-12 z-40 max-h-[min(36rem,70vh)] w-72 overflow-y-auto rounded-2xl border border-white/15 bg-neutral-950/95 p-4 shadow-2xl" id="archive-settings">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-serif text-xl text-ivory">Settings</h2>
         <button type="button" className="text-sm text-stone-300" onClick={onClose}>Close</button>
@@ -200,6 +245,53 @@ function SettingsPanel({
           className="mt-2 w-full accent-amber-100"
         />
         <p className="mt-1 text-xs text-stone-400">Higher lets more of the background show through the chart and lists.</p>
+        <FilterSlider
+          id="panel-blur"
+          label="Backdrop blur"
+          value={settings.panelBlur}
+          min={PANEL_BLUR_MIN}
+          max={PANEL_BLUR_MAX}
+          suffix="px"
+          onChange={(panelBlur) => onSettings({ panelBlur })}
+        />
+        <p className="mt-1 text-xs text-stone-400">Softens the picture behind the glass panels. Zero leaves it sharp.</p>
+        <FilterSlider
+          id="panel-brightness"
+          label="Brightness"
+          value={settings.panelBrightness}
+          min={PANEL_TONE_MIN}
+          max={PANEL_TONE_MAX}
+          suffix="%"
+          onChange={(panelBrightness) => onSettings({ panelBrightness })}
+        />
+        <FilterSlider
+          id="panel-contrast"
+          label="Contrast"
+          value={settings.panelContrast}
+          min={PANEL_TONE_MIN}
+          max={PANEL_TONE_MAX}
+          suffix="%"
+          onChange={(panelContrast) => onSettings({ panelContrast })}
+        />
+        <FilterSlider
+          id="panel-saturate"
+          label="Saturation"
+          value={settings.panelSaturate}
+          min={PANEL_TONE_MIN}
+          max={PANEL_TONE_MAX}
+          suffix="%"
+          onChange={(panelSaturate) => onSettings({ panelSaturate })}
+        />
+        <FilterSlider
+          id="panel-grayscale"
+          label="Grayscale"
+          value={settings.panelGrayscale}
+          min={PANEL_GRAYSCALE_MIN}
+          max={PANEL_GRAYSCALE_MAX}
+          suffix="%"
+          onChange={(panelGrayscale) => onSettings({ panelGrayscale })}
+        />
+        <p className="mt-1 text-xs text-stone-400">Brightness, contrast, saturation, and grayscale change the picture showing through the glass.</p>
       </fieldset>
       <fieldset className="mt-4">
         <legend className="text-xs uppercase tracking-[0.16em] text-gold">Player</legend>

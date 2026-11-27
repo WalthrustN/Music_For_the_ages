@@ -121,7 +121,7 @@ export function ChartList({
   }, [highlightRank, entries])
 
   return (
-    <section className="panel-glass flex min-h-0 flex-1 flex-col rounded-3xl border border-white/15 shadow-2xl shadow-black/40 backdrop-blur-xl" aria-labelledby="chart-heading">
+    <section className="panel-glass flex min-h-0 flex-1 flex-col rounded-3xl border border-white/15 shadow-2xl shadow-black/40" aria-labelledby="chart-heading">
       <header className="border-b border-white/10 px-4 py-4 sm:px-6">
         <p className="text-xs uppercase tracking-[0.2em] text-gold">{genreName}</p>
         <h2 id="chart-heading" className="font-serif text-4xl text-ivory">{year}</h2>

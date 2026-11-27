@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
+    headers: {
+      'Permissions-Policy': 'microphone=(self)',
+    },
     proxy: {
       '/api': 'http://127.0.0.1:3011',
     },

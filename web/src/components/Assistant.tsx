@@ -54,11 +54,18 @@ export function Assistant({
   handleRef.current = { toggleMic: () => { setOpen(true); speech.toggle() } }
 
   const listening = speech.status === 'listening'
+  const buttonLabel = speech.status === 'requesting'
+    ? 'Allow microphone'
+    : speech.status === 'transcribing'
+      ? 'Transcribing'
+      : listening
+        ? 'Listening'
+        : 'Listen'
 
   return (
     <div className="fixed right-3 bottom-3 z-30 flex w-[min(100%-1.5rem,24rem)] flex-col items-end gap-2 sm:right-5 sm:bottom-5">
       {open ? (
-        <section className="flex max-h-[min(32rem,70vh)] w-full flex-col rounded-3xl border border-white/15 bg-neutral-950/90 shadow-2xl backdrop-blur-xl">
+        <section className="panel-blur flex max-h-[min(32rem,70vh)] w-full flex-col rounded-3xl border border-white/15 bg-neutral-950/90 shadow-2xl">
           <header className="flex items-center justify-between px-4 py-3">
             <h2 className="font-serif text-xl">Archivist</h2>
             <button type="button" className="text-sm text-stone-300" onClick={() => setOpen(false)} aria-label="Collapse chat">
@@ -67,7 +74,7 @@ export function Assistant({
           </header>
           <div className="scroll-thin flex min-h-48 flex-1 flex-col gap-3 overflow-y-auto px-4" aria-live="polite">
             {messages.length === 0 ? (
-              <p className="text-sm text-stone-300">Ask about a year, a song, or which charts are still empty. Answers come only from the archive.</p>
+              <p className="text-sm text-stone-300">Name a song and the archivist looks it up in the archive and plays it. You can also ask about a year or which charts are still empty. Answers come only from the archive.</p>
             ) : null}
             {messages.map((message, index) => (
               <div key={`${message.role}-${index}`} className={message.role === 'user' ? 'self-end text-right' : 'self-start'}>
@@ -106,7 +113,12 @@ export function Assistant({
               id="assistant-input"
               value={speech.interim || draft}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder={listening ? 'Listening…' : 'Ask about a chart'}
+              placeholder={
+                speech.status === 'requesting' ? 'Allow the microphone…'
+                  : listening ? 'Listening…'
+                    : speech.status === 'transcribing' ? 'Transcribing…'
+                      : 'Name a song to play'
+              }
               className="min-w-0 flex-1 rounded-full border border-white/20 bg-black/40 px-3 py-2 text-sm"
             />
             <button type="submit" className="rounded-full bg-amber-100 px-3 py-2 text-sm text-neutral-950" disabled={send.isPending}>
@@ -119,14 +131,16 @@ export function Assistant({
       <button
         type="button"
         aria-pressed={listening}
-        aria-label={listening ? 'Stop listening' : 'Start voice input'}
+        aria-busy={speech.status === 'transcribing'}
+        aria-label={listening ? 'Stop listening' : buttonLabel}
         onClick={() => {
           setOpen(true)
           speech.toggle()
         }}
-        className={`grid h-14 w-14 place-items-center rounded-full bg-amber-100 text-neutral-950 shadow-lg ${listening ? 'motion-safe:animate-pulse ring-4 ring-amber-200/70' : ''}`}
+        className={`flex h-14 items-center justify-center gap-2 rounded-full bg-amber-100 px-5 text-sm font-medium text-neutral-950 shadow-lg ${listening ? 'motion-safe:animate-pulse ring-4 ring-amber-200/70' : ''}`}
       >
-        <span aria-hidden="true" className="text-xl">●</span>
+        <span aria-hidden="true" className="text-base leading-none">{listening ? '●' : '○'}</span>
+        {buttonLabel}
       </button>
     </div>
   )

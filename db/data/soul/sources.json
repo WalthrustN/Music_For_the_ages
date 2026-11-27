@@ -1,8 +1,58 @@
 {
+  "soul_1950.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Clyde McPhatter’s rhythm-and-blues top 10s with the Dominoes, released this year. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1951.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Clyde McPhatter’s rhythm-and-blues top 10s with the Dominoes, released this year. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1952.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s by Clyde McPhatter with the Dominoes and by the \"5\" Royales, released this year. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1953.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s by the \"5\" Royales, Clyde McPhatter with the Dominoes, and Clyde McPhatter and the Drifters, released this year. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1954.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s released this year for the artists covered so far, plus Ray Charles’s “I Got a Woman.” The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1955.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s released this year for the artists covered so far. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1956.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s released this year for the artists covered so far. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1957.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s released this year for the artists covered so far. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1958.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Rhythm-and-blues top 10s released this year for the artists covered so far. The order follows the release date. Billboard had no soul chart yet."
+  },
+  "soul_1959.csv": {
+    "source": "Compiled proto-soul singles",
+    "official": false,
+    "note": "Landmark soul singles already filed for this year. Clyde McPhatter had no rhythm-and-blues top 10 released in 1959. The order is a listening order. Billboard had no soul chart yet."
+  },
   "soul_1960.csv": {
     "source": "Compiled soul singles",
     "official": false,
-    "note": "Five soul singles released this year. The order is a listening order, not a chart rank. Billboard did not publish a year-end chart under the soul name until 1970."
+    "note": "Soul singles released this year, including Clyde McPhatter’s rhythm-and-blues top 10. The order is a listening order, not a chart rank. Billboard did not publish a year-end chart under the soul name until 1970."
   },
   "soul_1961.csv": {
     "source": "Compiled soul singles",
@@ -12,12 +62,12 @@
   "soul_1962.csv": {
     "source": "Compiled soul singles",
     "official": false,
-    "note": "Five soul singles released this year. The order is a listening order, not a chart rank. Billboard did not publish a year-end chart under the soul name until 1970."
+    "note": "Soul singles released this year, including Clyde McPhatter’s rhythm-and-blues top 10. The order is a listening order, not a chart rank. Billboard did not publish a year-end chart under the soul name until 1970."
   },
   "soul_1963.csv": {
     "source": "Compiled soul singles",
     "official": false,
-    "note": "Five soul singles released this year. The order is a listening order, not a chart rank. Billboard did not publish a year-end chart under the soul name until 1970."
+    "note": "Soul singles released this year, including Clyde McPhatter’s rhythm-and-blues top 10. The order is a listening order, not a chart rank. Billboard did not publish a year-end chart under the soul name until 1970."
   },
   "soul_1964.csv": {
     "source": "Compiled soul singles",
@@ -77,13 +127,13 @@
     "source": "Billboard year-end Hot Soul Singles",
     "url": "https://en.wikipedia.org/wiki/Billboard_Year-End_Hot_Soul_Singles_of_1974",
     "official": true,
-    "note": "Top 10 of this Billboard year-end chart. Transcribed from the Wikipedia list, which cites that year's Billboard year-end issue."
+    "note": "Ranks 1–10 are the Billboard year-end Hot Soul Singles, transcribed from the Wikipedia list. Be Thankful for What You Got is added after that list: a 1974 rhythm-and-blues number one, filed in the year the single was released."
   },
   "soul_1975.csv": {
     "source": "Billboard year-end Hot Soul Singles",
     "url": "https://en.wikipedia.org/wiki/Billboard_Year-End_Hot_Soul_Singles_of_1975",
     "official": true,
-    "note": "Top 10 of this Billboard year-end chart. Transcribed from the Wikipedia list, which cites that year's Billboard year-end issue."
+    "note": "Ranks 1–10 are the Billboard year-end Hot Soul Singles, transcribed from the Wikipedia list. Reasons is added after that list: the album track from That's the Way of the World, released March 3, 1975. It was not issued as a single."
   },
   "soul_1976.csv": {
     "source": "Billboard year-end Hot Soul Singles",
