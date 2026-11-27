@@ -4,6 +4,7 @@ import type {
   ChatTurn,
   CoverageCell,
   Genre,
+  MixPlaylist,
   SearchHit,
   SongDetail,
   UiAction,
@@ -41,14 +42,26 @@ export const api = {
       history: history.slice(-40).map((turn) => ({ role: turn.role, content: turn.content })),
     }),
   }),
-  createPlaylist: (genre: string, year: number, name: string) => request<{ playlist: { id: number } }>('/api/playlists', {
+  playlists: () => request<{ playlists: MixPlaylist[] }>('/api/playlists'),
+  createPlaylist: (name: string) => request<{ playlist: MixPlaylist }>('/api/playlists', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ genre, year, name }),
+    body: JSON.stringify({ name }),
   }),
-  addToPlaylist: (playlistId: number, body: { songId?: number; title?: string; artist?: string }) => request<{ songId: number; position: number }>(`/api/playlists/${playlistId}/songs`, {
+  addToPlaylist: (playlistId: number, songIds: number[]) => request<{ playlist: MixPlaylist }>(`/api/playlists/${playlistId}/songs`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ songIds }),
+  }),
+  removeFromPlaylist: (playlistId: number, songId: number) => request<{ playlist: MixPlaylist }>(`/api/playlists/${playlistId}/songs/${songId}`, {
+    method: 'DELETE',
+  }),
+  randomPlaylist: (body: { name?: string; genres: string[]; count?: number }) => request<{ playlist: MixPlaylist }>('/api/playlists/random', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
+  }),
+  deletePlaylist: (playlistId: number) => request<{ ok: true }>(`/api/playlists/${playlistId}`, {
+    method: 'DELETE',
   }),
 }

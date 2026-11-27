@@ -63,6 +63,8 @@ describe('playback requests', () => {
     expect(playQuery('Play Oh Girl')).toBe('Oh Girl')
     expect(playQuery('play that')).toBeNull()
     expect(playQuery('Who sang Oh Girl?')).toBeNull()
+    expect(messageAsksToPlay('Make a random soul playlist')).toBe(false)
+    expect(playQuery('Play a jazz playlist')).toBeNull()
   })
 
   it('replaces a false missing-recording answer when the archive can play the song', () => {
@@ -79,6 +81,7 @@ describe('system prompt', () => {
     expect(prompt).toContain('1880')
     expect(prompt).toContain('2026')
     expect(prompt).toContain('playSong')
+    expect(prompt).toContain('random_playlist')
     expect(prompt).toMatch(/Never invent/)
   })
 })
@@ -95,6 +98,12 @@ describe('tool arguments', () => {
     const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
     const result = await executeTool(db, 'drop_table', {}, { lastSearch: null })
     expect(result).toMatchObject({ error: expect.stringMatching(/Unknown tool/) })
+  })
+
+  it('refuses a playlist write when no writer is configured', async () => {
+    const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
+    const result = await executeTool(db, 'create_playlist', { name: 'Night' }, { lastSearch: null })
+    expect(result).toMatchObject({ error: expect.stringMatching(/not available/) })
   })
 
   it('rejects playSong without a song id before touching the database', async () => {

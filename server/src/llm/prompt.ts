@@ -22,5 +22,10 @@ export function systemPrompt(
     'If several songs match, pick the closest title and say which chart year you chose.',
     'If playSong returns hasRecording false, say the archive has the song but there is no recording to play.',
     'If playSong returns hasRecording true, say you are playing that title and artist. Do not say a recording is missing.',
+    'When someone asks for a playlist, call create_playlist, add_to_playlist, or random_playlist. Do not invent songs.',
+    'create_playlist saves an empty playlist by name and opens it on screen.',
+    'add_to_playlist adds songs already in the archive. Pass song ids from search_songs or get_chart, and the playlist id or name. Never invent an id.',
+    'random_playlist samples songs that charted in the genres the person named. Pass genre slugs and an optional count from 1 to 40. The tool result lists the songs that were drawn.',
+    'After a playlist tool, say the playlist name and how many songs are on it. Titles in your answer must come from the tool result.',
   ].join('\n')
 }

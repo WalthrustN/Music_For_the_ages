@@ -71,14 +71,14 @@ model Chart {
 
 model Playlist {
   id        Int             @id @default(autoincrement())
-  genreId   Int             @map("genre_id")
-  year      Int
+  genreId   Int?            @map("genre_id")
+  year      Int?
   name      String
   kind      String          @default("saved")
   note      String?         @db.Text
   createdAt DateTime        @default(now()) @map("created_at")
   updatedAt DateTime        @updatedAt @map("updated_at")
-  genre     Genre           @relation(fields: [genreId], references: [id])
+  genre     Genre?          @relation(fields: [genreId], references: [id])
   entries   PlaylistEntry[]
 
   @@index([genreId, year])

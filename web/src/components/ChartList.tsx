@@ -6,9 +6,11 @@ import { thumbnailUrl } from '../youtube'
 type RowData = {
   entries: ChartSong[]
   highlightRank: number | null
+  playlistArmed: boolean
   onOpenSong: (id: number) => void
   onOpenArtist: (id: number) => void
   onPlay: (entry: ChartSong) => void
+  onAdd: (entry: ChartSong) => void
 }
 
 function Thumbnail({ entry, onOpenSong, onPlay }: { entry: ChartSong; onOpenSong: (id: number) => void; onPlay: (entry: ChartSong) => void }) {
@@ -44,7 +46,7 @@ function Row({ index, style, data }: ListChildComponentProps<RowData>) {
   const sources = [...new Set(entry.charts.map((chart) => chart.sourceName))].join(', ')
   return (
     <div style={style} className="px-2">
-      <div className={`grid h-16 grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl px-3 ${
+      <div className={`grid h-16 grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl px-3 ${
         active ? 'bg-amber-200/20 ring-1 ring-amber-200/80' : 'hover:bg-white/5'
       }`}
       >
@@ -70,6 +72,19 @@ function Row({ index, style, data }: ListChildComponentProps<RowData>) {
           </button>
         </span>
         <span className="max-w-40 truncate text-right text-xs text-stone-400">{sources}</span>
+        <button
+          type="button"
+          aria-label={`Add ${entry.song.title} to playlist`}
+          title="Add to playlist"
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border text-sm ${
+            data.playlistArmed
+              ? 'border-gold/50 text-gold hover:bg-white/10'
+              : 'border-white/20 text-ivory hover:bg-white/10'
+          }`}
+          onClick={() => data.onAdd(entry)}
+        >
+          +
+        </button>
       </div>
     </div>
   )
@@ -87,6 +102,8 @@ export function ChartList({
   onOpenSong,
   onOpenArtist,
   onPlay,
+  onAdd,
+  playlistArmed,
 }: {
   genreName: string
   year: number
@@ -99,6 +116,8 @@ export function ChartList({
   onOpenSong: (id: number) => void
   onOpenArtist: (id: number) => void
   onPlay: (entry: ChartSong) => void
+  onAdd: (entry: ChartSong) => void
+  playlistArmed: boolean
 }) {
   const frame = useRef<HTMLDivElement>(null)
   const listRef = useRef<FixedSizeList>(null)
@@ -178,7 +197,7 @@ export function ChartList({
             width="100%"
             itemCount={entries.length}
             itemSize={72}
-            itemData={{ entries, highlightRank, onOpenSong, onOpenArtist, onPlay }}
+            itemData={{ entries, highlightRank, playlistArmed, onOpenSong, onOpenArtist, onPlay, onAdd }}
             itemKey={(index, data) => data.entries[index].song.id}
             overscanCount={8}
             style={{ position: 'absolute', inset: 0 }}

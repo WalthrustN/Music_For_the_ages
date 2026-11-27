@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
 import { api } from './api'
 import { Assistant, type AssistantHandle } from './components/Assistant'
@@ -6,12 +6,13 @@ import { ChartList } from './components/ChartList'
 import { Player } from './components/Player'
 import { Drawer } from './components/Drawer'
 import { Heatmap } from './components/Heatmap'
+import { PlaylistMenu, type PendingSong } from './components/PlaylistMenu'
 import { SoulPage } from './components/SoulPage'
 import { TopBar } from './components/TopBar'
 import { VideoBackground } from './components/VideoBackground'
-import { YearLists } from './components/YearLists'
 import { YearNav } from './components/YearNav'
 import { useHotkeys } from './hooks/useHotkeys'
+import { usePlaylists } from './hooks/usePlaylists'
 import { useSettings } from './hooks/useSettings'
 import type { ChartSong, SearchHit, UiAction } from './types'
 
@@ -37,6 +38,12 @@ export function App() {
   const { settings, update: updateSettings } = useSettings()
   const searchRef = useRef<HTMLInputElement>(null)
   const assistantRef = useRef<AssistantHandle>(null)
+  const queryClient = useQueryClient()
+  const playlists = usePlaylists()
+  const [playlistOpen, setPlaylistOpen] = useState(false)
+  const [playlistId, setPlaylistId] = useState<number | null>(null)
+  const [pendingSong, setPendingSong] = useState<PendingSong | null>(null)
+  const [playlistNotice, setPlaylistNotice] = useState<string | null>(null)
 
   const genres = genresQuery.data?.genres ?? []
   const coverage = coverageQuery.data?.coverage ?? []
@@ -93,6 +100,25 @@ export function App() {
     setPlaying({ songId: song.songId, title: song.title, artist: song.artist, videoId: song.videoId })
   }
 
+  function addChartSong(entry: ChartSong) {
+    if (!playlistId) {
+      setPendingSong({ songId: entry.song.id, title: entry.song.title })
+      setPlaylistNotice(null)
+      setPlaylistOpen(true)
+      return
+    }
+    playlists.add.mutate(
+      { id: playlistId, songIds: [entry.song.id] },
+      {
+        onSuccess: () => setPlaylistNotice(null),
+        onError: (error: Error) => {
+          setPlaylistNotice(error.message)
+          setPlaylistOpen(true)
+        },
+      },
+    )
+  }
+
   function openHit(hit: SearchHit) {
     setGenre(hit.genreSlug)
     setYear(hit.year)
@@ -114,6 +140,11 @@ export function App() {
     } else if (action.type === 'showArtist') {
       setArtistId(action.artistId)
       setSongId(null)
+    } else if (action.type === 'showPlaylist') {
+      setPlaylistId(action.playlistId)
+      setPlaylistOpen(true)
+      setPlaylistNotice(null)
+      void queryClient.invalidateQueries({ queryKey: ['playlists'] })
     } else if (action.type === 'playSong') {
       if (action.genre) setGenre(action.genre)
       if (action.year) setYear(Math.min(maxYear, Math.max(YEAR_MIN, action.year)))
@@ -170,6 +201,19 @@ export function App() {
             onPick={openHit}
             settings={settings}
             onSettings={updateSettings}
+            playlist={(
+              <PlaylistMenu
+                open={playlistOpen}
+                onOpenChange={setPlaylistOpen}
+                activeId={playlistId}
+                onActiveId={setPlaylistId}
+                genres={genres}
+                pending={pendingSong}
+                onPendingHandled={() => setPendingSong(null)}
+                notice={playlistNotice}
+                onPlay={playRecording}
+              />
+            )}
           />
         )}
         {view === 'heatmap' ? (
@@ -194,28 +238,21 @@ export function App() {
         ) : (
           <>
             <YearNav year={year} maxYear={maxYear} counts={counts} onYear={selectYear} />
-            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 pb-24 sm:px-5 lg:flex-row lg:overflow-hidden">
-              <div className="flex min-h-80 min-w-0 flex-1 flex-col gap-3">
-                <ChartList
-                  genreName={genreName}
-                  year={year}
-                  chart={chartQuery.data}
-                  isLoading={chartQuery.isLoading}
-                  isError={chartQuery.isError}
-                  error={chartQuery.error as Error | null}
-                  onRetry={() => { void chartQuery.refetch() }}
-                  highlightRank={highlightRank}
-                  onOpenSong={(id) => { setSongId(id); setArtistId(null) }}
-                  onOpenArtist={(id) => { setArtistId(id); setSongId(null) }}
-                  onPlay={playEntry}
-                />
-              </div>
-              <YearLists
-                genre={genre}
+            <div className="flex min-h-0 flex-1 flex-col px-3 pb-24 sm:px-5">
+              <ChartList
                 genreName={genreName}
                 year={year}
-                playlists={chartQuery.data?.playlists ?? []}
-                charted={chartQuery.data?.songs ?? []}
+                chart={chartQuery.data}
+                isLoading={chartQuery.isLoading}
+                isError={chartQuery.isError}
+                error={chartQuery.error as Error | null}
+                onRetry={() => { void chartQuery.refetch() }}
+                highlightRank={highlightRank}
+                onOpenSong={(id) => { setSongId(id); setArtistId(null) }}
+                onOpenArtist={(id) => { setArtistId(id); setSongId(null) }}
+                onPlay={playEntry}
+                onAdd={addChartSong}
+                playlistArmed={playlistId != null}
               />
             </div>
           </>

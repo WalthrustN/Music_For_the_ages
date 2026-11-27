@@ -171,6 +171,65 @@ describe('recording link', () => {
   })
 })
 
+describe('mix playlists', () => {
+  const writer = new PrismaClient()
+  const created: number[] = []
+
+  afterAll(async () => {
+    if (created.length > 0) await writer.playlist.deleteMany({ where: { id: { in: created } } })
+    await writer.$disconnect()
+  })
+
+  it('saves a playlist, adds an archive song, and draws a random one from soul', async () => {
+    const ctx: ToolContext = { lastSearch: null }
+    const named = `Mix ${Date.now()}`
+    const made = await executeTool(reader, 'create_playlist', { name: named }, ctx, writer) as {
+      playlist?: { id: number; entryCount: number }
+      error?: string
+    }
+    if (made.playlist?.id) created.push(made.playlist.id)
+    expect(made.error).toBeUndefined()
+    expect(made.playlist?.entryCount).toBe(0)
+    expect(ctx.action).toEqual({ type: 'showPlaylist', playlistId: made.playlist?.id })
+
+    const chart = await reader.chart.findFirst({
+      where: { year: 1972, genre: { slug: 'soul' } },
+      include: { entries: { take: 1 } },
+    })
+    const songId = chart?.entries[0]?.songId
+    expect(songId).toBeTypeOf('number')
+    const added = await executeTool(reader, 'add_to_playlist', {
+      playlist_id: made.playlist?.id,
+      song_ids: [songId],
+    }, { lastSearch: null }, writer) as { playlist?: { entryCount: number }; added?: { title: string }[]; error?: string }
+    expect(added.error).toBeUndefined()
+    expect(added.playlist?.entryCount).toBe(1)
+    expect(added.added).toHaveLength(1)
+
+    const randomCtx: ToolContext = { lastSearch: null }
+    const random = await executeTool(reader, 'random_playlist', {
+      genres: ['Soul'],
+      count: 4,
+      name: `Random ${Date.now()}`,
+    }, randomCtx, writer) as {
+      playlist?: { id: number; entryCount: number; name: string }
+      songs?: { title: string; artist: string }[]
+      error?: string
+    }
+    if (random.playlist?.id) created.push(random.playlist.id)
+    expect(random.error).toBeUndefined()
+    expect(random.playlist?.entryCount).toBe(4)
+    expect(random.songs).toHaveLength(4)
+    expect(randomCtx.action).toEqual({ type: 'showPlaylist', playlistId: random.playlist?.id })
+
+    const unknown = await executeTool(reader, 'random_playlist', {
+      genres: ['not-a-genre'],
+      name: 'Nope',
+    }, { lastSearch: null }, writer) as { error?: string }
+    expect(unknown.error).toMatch(/Unknown genre/)
+  })
+})
+
 afterAll(async () => {
   await reader.$disconnect()
 })

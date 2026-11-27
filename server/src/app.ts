@@ -6,7 +6,14 @@ import { runAssistant } from './llm/loop.js'
 import { systemPrompt } from './llm/prompt.js'
 import { answerForPlayback, executeTool, messageAsksToPlay, playQuery, TOOL_DEFINITIONS, type ToolContext } from './llm/tools.js'
 import type { LLMClient } from './llm/types.js'
-import { addSongToPlaylist, createPlaylist } from './playlists.js'
+import {
+  addSongsToPlaylist,
+  createMixPlaylist,
+  createRandomPlaylist,
+  deleteMixPlaylist,
+  listMixPlaylists,
+  removeSongFromPlaylist,
+} from './playlists.js'
 import { parseYouTubeVideoId } from './youtube.js'
 import {
   getArtistHistory,
@@ -139,40 +146,82 @@ export async function buildApp(deps: AppDeps) {
     return { id: song.id, youtubeVideoId: song.youtubeVideoId }
   })
 
-  const lists = deps.writer ?? deps.db
+  app.get('/api/playlists', async () => ({ playlists: await listMixPlaylists(deps.db) }))
 
   app.post('/api/playlists', async (request, reply) => {
+    if (!deps.writer) return reply.code(503).send({ error: 'Playlist edits are not available.' })
+    const body = parseOr400(z.object({ name: z.string().trim().min(1).max(120) }), request.body, reply)
+    if (!body) return
+    const result = await createMixPlaylist(deps.writer, body.name)
+    if ('error' in result) return reply.code(result.status).send({ error: result.error })
+    return reply.code(201).send(result)
+  })
+
+  app.post('/api/playlists/random', async (request, reply) => {
+    if (!deps.writer) return reply.code(503).send({ error: 'Playlist edits are not available.' })
     const body = parseOr400(
       z.object({
-        genre: z.string().min(1),
-        year: z.number().int().min(1880).max(2100),
-        name: z.string().trim().min(1).max(120),
+        name: z.string().trim().min(1).max(120).optional(),
+        genres: z.array(z.string().trim().min(1)).min(1).max(14),
+        count: z.number().int().min(1).max(40).optional(),
       }),
       request.body,
       reply,
     )
     if (!body) return
-    const result = await createPlaylist(lists, body)
+    const result = await createRandomPlaylist(deps.writer, {
+      name: body.name,
+      genres: body.genres,
+      count: body.count ?? 12,
+    })
     if ('error' in result) return reply.code(result.status).send({ error: result.error })
     return reply.code(201).send(result)
   })
 
+  app.delete('/api/playlists/:id', async (request, reply) => {
+    if (!deps.writer) return reply.code(503).send({ error: 'Playlist edits are not available.' })
+    const params = parseOr400(z.object({ id: z.coerce.number().int().positive() }), request.params, reply)
+    if (!params) return
+    const result = await deleteMixPlaylist(deps.writer, params.id)
+    if ('error' in result) return reply.code(result.status).send({ error: result.error })
+    return result
+  })
+
   app.post('/api/playlists/:id/songs', async (request, reply) => {
+    if (!deps.writer) return reply.code(503).send({ error: 'Playlist edits are not available.' })
     const params = parseOr400(z.object({ id: z.coerce.number().int().positive() }), request.params, reply)
     if (!params) return
     const body = parseOr400(
       z.object({
         songId: z.number().int().positive().optional(),
-        title: z.string().trim().min(1).optional(),
-        artist: z.string().trim().min(1).optional(),
+        songIds: z.array(z.number().int().positive()).max(40).optional(),
+      }).refine((value) => value.songId != null || (value.songIds?.length ?? 0) > 0, {
+        message: 'Provide a song from the archive.',
       }),
       request.body,
       reply,
     )
     if (!body) return
-    const result = await addSongToPlaylist(lists, params.id, body)
+    const songIds = [...(body.songIds ?? []), ...(body.songId != null ? [body.songId] : [])]
+    const result = await addSongsToPlaylist(deps.writer, params.id, songIds)
     if ('error' in result) return reply.code(result.status).send({ error: result.error })
     return reply.code(201).send(result)
+  })
+
+  app.delete('/api/playlists/:id/songs/:songId', async (request, reply) => {
+    if (!deps.writer) return reply.code(503).send({ error: 'Playlist edits are not available.' })
+    const params = parseOr400(
+      z.object({
+        id: z.coerce.number().int().positive(),
+        songId: z.coerce.number().int().positive(),
+      }),
+      request.params,
+      reply,
+    )
+    if (!params) return
+    const result = await removeSongFromPlaylist(deps.writer, params.id, params.songId)
+    if ('error' in result) return reply.code(result.status).send({ error: result.error })
+    return result
   })
 
   app.post('/api/assistant', async (request, reply) => {
@@ -213,7 +262,7 @@ export async function buildApp(deps: AppDeps) {
         tools: TOOL_DEFINITIONS,
         getAction: () => ctx.action,
         log: deps.logTools ? (line) => console.log(line) : undefined,
-        execute: (name, args) => executeTool(deps.db, name, args, ctx),
+        execute: (name, args) => executeTool(deps.db, name, args, ctx, deps.writer ?? null),
       })
       let finishedPlay = false
       if (result.action?.type !== 'playSong' && messageAsksToPlay(body.message) && ctx.lastSearch?.length) {

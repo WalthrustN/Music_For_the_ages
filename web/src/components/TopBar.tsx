@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useId, useState, type RefObject } from 'react'
+import { useEffect, useId, useState, type ReactNode, type RefObject } from 'react'
 import { api } from '../api'
 import type { ArchiveSettings, PlayerSide } from '../settings'
 import {
@@ -25,6 +25,7 @@ export function TopBar({
   onPick,
   settings,
   onSettings,
+  playlist,
 }: {
   genres: Genre[]
   genre: string
@@ -36,6 +37,7 @@ export function TopBar({
   onPick: (hit: SearchHit) => void
   settings: ArchiveSettings
   onSettings: (patch: Partial<ArchiveSettings>) => void
+  playlist: ReactNode
 }) {
   const listId = useId()
   const [q, setQ] = useState('')
@@ -80,9 +82,11 @@ export function TopBar({
         >
           About soul
         </button>
+        <div className="ml-auto flex w-full min-w-0 items-center gap-2 sm:w-auto">
+        {playlist}
         <form
           role="search"
-          className="relative ml-auto w-full min-w-0 sm:max-w-sm"
+          className="relative min-w-0 flex-1 sm:w-72 sm:flex-none"
           onSubmit={(event) => event.preventDefault()}
         >
           <label htmlFor="archive-search" className="sr-only">Search songs and artists</label>
@@ -153,6 +157,7 @@ export function TopBar({
               onClose={() => setSettingsOpen(false)}
             />
           ) : null}
+        </div>
         </div>
       </div>
       <div className="scroll-thin flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Genres">

@@ -105,6 +105,14 @@ export type ArtistHistory = {
   appearances: Appearance[]
 }
 
+export type MixPlaylist = {
+  id: number
+  name: string
+  note: string | null
+  entryCount: number
+  entries: PlaylistSong[]
+}
+
 export type UiAction =
   | { type: 'showChart'; genre: string; year: number; rank?: number }
   | { type: 'showResults'; results: SearchHit[] }
@@ -120,6 +128,7 @@ export type UiAction =
       year?: number
       rank?: number
     }
+  | { type: 'showPlaylist'; playlistId: number }
 
 export type ChatTurn = {
   role: 'user' | 'assistant'

@@ -74,7 +74,7 @@ export function Assistant({
           </header>
           <div className="scroll-thin flex min-h-48 flex-1 flex-col gap-3 overflow-y-auto px-4" aria-live="polite">
             {messages.length === 0 ? (
-              <p className="text-sm text-stone-300">Name a song and the archivist looks it up in the archive and plays it. You can also ask about a year or which charts are still empty. Answers come only from the archive.</p>
+              <p className="text-sm text-stone-300">Name a song and the archivist looks it up in the archive and plays it. You can also ask about a year, which charts are still empty, or for a playlist drawn from genres in the archive.</p>
             ) : null}
             {messages.map((message, index) => (
               <div key={`${message.role}-${index}`} className={message.role === 'user' ? 'self-end text-right' : 'self-start'}>
