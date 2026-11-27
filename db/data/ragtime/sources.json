@@ -1,0 +1,37 @@
+{
+  "ragtime_1899.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "Maple Leaf Rag was published by John Stark & Son of Sedalia. Joplin signed the contract on August 10, 1899, and the copyright was registered on September 18, 1899. The order is a listening order, not a chart rank."
+  },
+  "ragtime_1902.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "The Entertainer was published by John Stark & Son. The copyright was registered on December 29, 1902, with A Breeze from Alabama and Elite Syncopations. The order is a listening order, not a chart rank."
+  },
+  "ragtime_1906.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "Frog Legs Rag was published by John Stark in 1906. The order is a listening order, not a chart rank."
+  },
+  "ragtime_1908.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "Sensation was Joseph Lamb's first rag published by John Stark, in 1908. The sheet credits Scott Joplin as arranger. The order is a listening order, not a chart rank."
+  },
+  "ragtime_1909.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "Grace and Beauty was published by Stark Music Co. in 1909. The order is a listening order, not a chart rank."
+  },
+  "ragtime_1913.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "American Beauty Rag was published by John Stark in 1913. The order is a listening order, not a chart rank."
+  },
+  "ragtime_1917.csv": {
+    "source": "Classic ragtime",
+    "official": false,
+    "note": "Blake said he wrote Charleston Rag around 1899, when he called it Sounds of Africa. The first issued performance is Ampico piano roll 54174, copyrighted on August 8, 1917. The sheet music was not printed until 1974. The order is a listening order, not a chart rank."
+  }
+}

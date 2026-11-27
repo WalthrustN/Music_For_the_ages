@@ -23,7 +23,7 @@ type NowPlaying = {
   videoId: string
 }
 
-const YEAR_MIN = 1880
+const YEAR_MIN = 1860
 
 export function App() {
   const genresQuery = useQuery({ queryKey: ['genres'], queryFn: api.genres })

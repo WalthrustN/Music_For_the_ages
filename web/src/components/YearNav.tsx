@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
-const YEAR_MIN = 1880
+const YEAR_MIN = 1860
 
 export function YearNav({
   year,
@@ -16,7 +16,7 @@ export function YearNav({
 }) {
   const reduced = usePrefersReducedMotion()
   const decades: number[] = []
-  for (let decade = 1880; decade <= maxYear; decade += 10) decades.push(decade)
+  for (let decade = YEAR_MIN; decade <= maxYear; decade += 10) decades.push(decade)
   const years: number[] = []
   for (let value = YEAR_MIN; value <= maxYear; value += 1) years.push(value)
   const activeDecade = Math.floor(year / 10) * 10

@@ -22,7 +22,7 @@
   "blues_1921.csv": {
     "source": "Ethel Waters",
     "official": false,
-    "note": "Ethel Waters's first hits, for Black Swan. Down Home Blues, with Fletcher Henderson on piano, was recorded in May 1921 and reached number 5. There'll Be Some Changes Made also reached number 5 in 1921. The order is a listening order, not a chart rank."
+    "note": "Ethel Waters's first hits, for Black Swan. Down Home Blues, with Fletcher Henderson on piano, was recorded in May 1921 and reached number 5. There'll Be Some Changes Made also reached number 5 in 1921. Arkansas Blues is Lucille Hegamin with her Blue Flame Syncopators, Arto 9053, March 1921. The order is a listening order, not a chart rank."
   },
   "blues_1920.csv": {
     "source": "25 Essential Blues Songs from the 1920s",
@@ -34,7 +34,7 @@
     "source": "25 Essential Blues Songs from the 1920s",
     "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
     "official": false,
-    "note": "From Egil's list at musicthisday.com, plus Bessie Smith's 1923 record Ain't Nobody's Business If I Do. The song was published in 1922 by Porter Grainger and Everett Robbins. The order is a listening order, not a chart rank."
+    "note": "From Egil's list at musicthisday.com, plus Bessie Smith's 1923 record Ain't Nobody's Business If I Do. The song was published in 1922 by Porter Grainger and Everett Robbins. Sara Martin recorded Tain't Nobody's Bus'ness If I Do on December 1, 1922 with Fats Waller. OKeh 8043 was issued in 1923. The order is a listening order, not a chart rank."
   },
   "blues_1925.csv": {
     "source": "25 Essential Blues Songs from the 1920s",
@@ -64,6 +64,106 @@
     "source": "25 Essential Blues Songs from the 1920s",
     "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
     "official": false,
-    "note": "From Egil's list at musicthisday.com. Statesboro Blues was recorded on October 17, 1928 and issued in January 1929. Pine Top's Boogie Woogie was recorded on December 29, 1928 and issued on March 1, 1929. The order follows that list, not a chart rank."
+    "note": "From Egil's list at musicthisday.com, plus later additions. Charley Patton's High Water Everywhere was issued in 1929 on Paramount 12909. Statesboro Blues was recorded on October 17, 1928 and issued in January 1929. Bessie Smith recorded Nobody Knows You When You're Down and Out on May 15, 1929 for Columbia. Hambone Willie Newbern's Roll and Tumble Blues, OKeh 8679, was recorded on March 13, 1929 and issued that year. Later Chicago records call that piece Rollin' and Tumblin'. The order is a listening order, not a chart rank."
+  },
+  "blues_1930.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Son House, Willie Brown, and Charley Patton recorded for Paramount at Grafton in 1930. House's issued sides are My Black Mama, Preachin' the Blues, and Dry Spell Blues. Brown's only issued record is M & O Blues / Future Blues, Paramount 13090. Some catalogs date that issue 1931. Moon Going Down, Paramount 13014, has Brown on second guitar. The order is a listening order, not a chart rank."
+  },
+  "blues_1934.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Charley Patton's last session, January 30 to February 1, 1934, for Vocalion. Stone Pony Blues and 34 Blues were issued that year. Pony Blues stays in 1929."
+  },
+  "blues_1937.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Robert Johnson's Vocalion singles from the November 1936 San Antonio session and the June 1937 Dallas session. Terraplane Blues, his best seller, was issued in March 1937. Cross Road Blues was issued in May 1937. Sweet Home Chicago was issued in the summer of 1937. Hellhound on My Trail was labeled Hell Hound on My Trail. The order is a listening order, not a chart rank."
+  },
+  "blues_1938.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Robert Johnson's 1938 Vocalion singles. Stop Breakin' Down Blues was issued on March 20, 1938. The order is a listening order, not a chart rank."
+  },
+  "blues_1939.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Love in Vain and Preachin' Blues were issued together on Vocalion 04630 on February 9, 1939, Robert Johnson's last single. Roll 'Em Pete, Big Joe Turner with Pete Johnson, was recorded on December 30, 1938 and issued on Vocalion 4607 in February 1939. It is boogie-woogie and blues shouting, filed here by its issue year."
+  },
+  "blues_1948.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Muddy Waters's first hit, I Can't Be Satisfied / I Feel Like Going Home, Aristocrat 1305, reached R&B number 11. Alan Lomax had recorded him in Mississippi in 1941. John Lee Hooker's Boogie Chillen' was released by Modern in November 1948 and reached R&B number 1 in January 1949. Hooker was working in Detroit. The order is a listening order, not a chart rank."
+  },
+  "blues_1950.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Muddy Waters on Chess. Rollin' Stone is Chess 1426. Louisiana Blues, Chess 1441, reached R&B number 10. The order is a listening order, not a chart rank."
+  },
+  "blues_1951.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Howlin' Wolf's first Chess single, 1479, was issued on August 15, 1951, from a Memphis session Sam Phillips leased to Chess. Moanin' at Midnight reached R&B number 10. How Many More Years reached number 4. Ike Turner played piano. John Lee Hooker's I'm in the Mood, Modern, October 1951, spent four weeks at R&B number 1. Muddy Waters's Long Distance Call, Chess 1452, reached number 8. The order is a listening order, not a chart rank."
+  },
+  "blues_1954.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Chicago blues at Chess. Willie Dixon wrote I'm Your Hoochie Coochie Man, Chess 1560, R&B number 3. I Just Want to Make Love to You, Chess 1571, reached number 4. I'm Ready, Chess 1579, reached number 4. Howlin' Wolf's Evil is Chess 1575. The order is a listening order, not a chart rank."
+  },
+  "blues_1955.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Mannish Boy, Chess 1602, R&B number 5, was Muddy Waters's answer to Bo Diddley's I'm a Man. Maybellene, Chess 1604, July 1955, was sold as rock and roll, adapted from the fiddle tune Ida Red, and also topped the R&B chart. Bo Diddley and I'm a Man, Checker 814, were recorded on March 2, 1955 with Otis Spann and Willie Dixon and reached R&B number 1. This archive has no rock genre, so these Chess rock and roll records sit with the Chicago blues made in the same studio. The order is a listening order, not a chart rank."
+  },
+  "blues_1956.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Smokestack Lightning, Chess 1618, March 1956. The label spells it Smoke Stack Lightning. Roll Over Beethoven, Chess 1626, May 1956, was sold as rock and roll. Who Do You Love?, Checker 842, July 1956. The order is a listening order, not a chart rank."
+  },
+  "blues_1957.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Got My Mojo Working, Chess 1652, 1957. The better-known live version is from the Newport Jazz Festival in 1960."
+  },
+  "blues_1958.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Johnny B. Goode, Chess 1691, March 1958. Chess sold it as rock and roll. It is filed with the Chicago blues records from the same studio."
+  },
+  "blues_1960.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Spoonful, written by Willie Dixon, Chess 1762, June 1960."
+  },
+  "blues_1961.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Little Red Rooster, written by Willie Dixon, issued by Chess in 1961."
+  },
+  "blues_1962.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Boom Boom, Vee-Jay, 1962. John Lee Hooker recorded it in Chicago. His earlier hits were made in Detroit."
+  },
+  "blues_1964.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Killing Floor, Chess, 1964."
+  },
+  "blues_1924.csv": {
+    "source": "Early blues and jump blues",
+    "official": false,
+    "note": "Ida Cox's Death Letter Blues, with Lovie Austin and Her Blues Serenaders, was recorded in Chicago in August 1924 and issued that year on Paramount 12220. It is a different song from Son House's Death Letter."
+  },
+  "blues_1936.csv": {
+    "source": "Early blues and jump blues",
+    "official": false,
+    "note": "I'll Keep Sittin' On It (If I Can't Sell It), Georgia White, Decca 7192, July 1936. She recorded it in Chicago on May 12, 1936. Alex Hill and Andy Razaf wrote it. The list that named Ruth Willis in 1933 was pointing at this song."
+  },
+  "blues_1965.csv": {
+    "source": "Delta and Chicago blues",
+    "official": false,
+    "note": "Death Letter is from Son House's album Father of Folk Blues, Columbia, recorded in April 1965. It reworks My Black Mama, which stays in 1930."
   }
 }

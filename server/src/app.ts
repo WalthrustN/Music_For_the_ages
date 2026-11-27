@@ -32,7 +32,7 @@ export type AppDeps = {
   logTools?: boolean
 }
 
-const yearParam = z.coerce.number().int().min(1880).max(2100)
+const yearParam = z.coerce.number().int().min(1860).max(2100)
 
 function parseOr400<T>(schema: ZodType<T>, value: unknown, reply: FastifyReply): T | null {
   const parsed = schema.safeParse(value)
