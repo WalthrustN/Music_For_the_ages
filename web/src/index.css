@@ -9,6 +9,32 @@
 
 :root {
   color-scheme: dark;
+  --panel-alpha: 0.5;
+  --panel-blur: 24px;
+  --panel-brightness: 100%;
+  --panel-contrast: 100%;
+  --panel-saturate: 100%;
+  --panel-grayscale: 0%;
+}
+
+.panel-glass,
+.panel-blur {
+  -webkit-backdrop-filter:
+    blur(var(--panel-blur))
+    brightness(var(--panel-brightness))
+    contrast(var(--panel-contrast))
+    saturate(var(--panel-saturate))
+    grayscale(var(--panel-grayscale));
+  backdrop-filter:
+    blur(var(--panel-blur))
+    brightness(var(--panel-brightness))
+    contrast(var(--panel-contrast))
+    saturate(var(--panel-saturate))
+    grayscale(var(--panel-grayscale));
+}
+
+.panel-glass {
+  background-color: rgb(10 10 10 / var(--panel-alpha));
 }
 
 html,

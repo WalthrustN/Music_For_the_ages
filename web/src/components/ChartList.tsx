@@ -1,29 +1,65 @@
 import { useEffect, useRef, useState } from 'react'
 import { FixedSizeList, type ListChildComponentProps } from 'react-window'
-import type { ChartEntry, ChartPayload } from '../types'
+import type { ChartPayload, ChartSong } from '../types'
+import { thumbnailUrl } from '../youtube'
 
 type RowData = {
-  entries: ChartEntry[]
+  entries: ChartSong[]
   highlightRank: number | null
+  playlistArmed: boolean
   onOpenSong: (id: number) => void
   onOpenArtist: (id: number) => void
+  onPlay: (entry: ChartSong) => void
+  onAdd: (entry: ChartSong) => void
+}
+
+function Thumbnail({ entry, onOpenSong, onPlay }: { entry: ChartSong; onOpenSong: (id: number) => void; onPlay: (entry: ChartSong) => void }) {
+  const videoId = entry.song.youtubeVideoId
+  if (!videoId) {
+    return (
+      <button
+        type="button"
+        aria-label={`No recording linked for ${entry.song.title}. Add one.`}
+        className="grid h-10 w-16 place-items-center rounded-md border border-dashed border-white/25 text-xs text-stone-400"
+        onClick={() => onOpenSong(entry.song.id)}
+      >
+        Link
+      </button>
+    )
+  }
+  return (
+    <button
+      type="button"
+      aria-label={`Play ${entry.song.title} by ${entry.artist.name}`}
+      className="relative h-10 w-16 overflow-hidden rounded-md bg-black"
+      onClick={() => onPlay(entry)}
+    >
+      <img src={thumbnailUrl(videoId)} alt="" className="h-full w-full object-cover" />
+      <span className="absolute inset-0 grid place-items-center bg-black/30 text-sm text-ivory" aria-hidden="true">▶</span>
+    </button>
+  )
 }
 
 function Row({ index, style, data }: ListChildComponentProps<RowData>) {
   const entry = data.entries[index]
-  const active = entry.rank === data.highlightRank
+  const active = entry.bestRank === data.highlightRank
+  const sources = [...new Set(entry.charts.map((chart) => chart.sourceName))].join(', ')
   return (
     <div style={style} className="px-2">
-      <div className={`grid h-16 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl px-3 ${
+      <div className={`grid h-16 grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto_auto] items-center gap-3 rounded-2xl px-3 ${
         active ? 'bg-amber-200/20 ring-1 ring-amber-200/80' : 'hover:bg-white/5'
       }`}
       >
-        <span className="font-serif text-lg tabular-nums text-gold">{String(entry.rank).padStart(2, '0')}</span>
+        <span className="font-serif text-lg tabular-nums text-gold">{String(entry.bestRank).padStart(2, '0')}</span>
+        <Thumbnail entry={entry} onOpenSong={data.onOpenSong} onPlay={data.onPlay} />
         <span className="min-w-0">
           <button
             type="button"
             className="block max-w-full truncate text-left font-serif text-lg text-ivory"
-            onClick={() => data.onOpenSong(entry.song.id)}
+            onClick={() => {
+              data.onOpenSong(entry.song.id)
+              if (entry.song.youtubeVideoId) data.onPlay(entry)
+            }}
           >
             {entry.song.title}
           </button>
@@ -35,7 +71,20 @@ function Row({ index, style, data }: ListChildComponentProps<RowData>) {
             {entry.artist.name}
           </button>
         </span>
-        <span className="text-sm tabular-nums text-stone-400">{entry.song.releaseYear ?? ''}</span>
+        <span className="max-w-40 truncate text-right text-xs text-stone-400">{sources}</span>
+        <button
+          type="button"
+          aria-label={`Add ${entry.song.title} to playlist`}
+          title="Add to playlist"
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border text-sm ${
+            data.playlistArmed
+              ? 'border-gold/50 text-gold hover:bg-white/10'
+              : 'border-white/20 text-ivory hover:bg-white/10'
+          }`}
+          onClick={() => data.onAdd(entry)}
+        >
+          +
+        </button>
       </div>
     </div>
   )
@@ -52,6 +101,9 @@ export function ChartList({
   highlightRank,
   onOpenSong,
   onOpenArtist,
+  onPlay,
+  onAdd,
+  playlistArmed,
 }: {
   genreName: string
   year: number
@@ -63,11 +115,14 @@ export function ChartList({
   highlightRank: number | null
   onOpenSong: (id: number) => void
   onOpenArtist: (id: number) => void
+  onPlay: (entry: ChartSong) => void
+  onAdd: (entry: ChartSong) => void
+  playlistArmed: boolean
 }) {
   const frame = useRef<HTMLDivElement>(null)
   const listRef = useRef<FixedSizeList>(null)
   const [height, setHeight] = useState(360)
-  const entries = chart?.entries ?? []
+  const entries = chart?.songs ?? []
 
   useEffect(() => {
     const element = frame.current
@@ -76,39 +131,40 @@ export function ChartList({
     observer.observe(element)
     setHeight(Math.max(160, element.clientHeight))
     return () => observer.disconnect()
-  }, [chart?.chart?.id, isLoading])
+  }, [chart?.songs.length, isLoading])
 
   useEffect(() => {
     if (highlightRank == null) return
-    const index = entries.findIndex((entry) => entry.rank === highlightRank)
+    const index = entries.findIndex((entry) => entry.bestRank === highlightRank)
     if (index >= 0) listRef.current?.scrollToItem(index, 'center')
   }, [highlightRank, entries])
 
-  const record = chart?.chart
-
   return (
-    <section className="flex min-h-0 flex-1 flex-col rounded-3xl border border-white/15 bg-neutral-950/75 shadow-2xl shadow-black/40 backdrop-blur-xl" aria-labelledby="chart-heading">
+    <section className="panel-glass flex min-h-0 flex-1 flex-col rounded-3xl border border-white/15 shadow-2xl shadow-black/40" aria-labelledby="chart-heading">
       <header className="border-b border-white/10 px-4 py-4 sm:px-6">
         <p className="text-xs uppercase tracking-[0.2em] text-gold">{genreName}</p>
         <h2 id="chart-heading" className="font-serif text-4xl text-ivory">{year}</h2>
         {isLoading ? <div className="mt-3 h-4 w-48 animate-pulse rounded bg-white/10" /> : null}
-        {record ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-stone-200">
-            <span>{record.sourceName}</span>
-            <span className={`rounded-full px-2 py-0.5 text-xs ${record.isOfficial ? 'bg-emerald-300/20 text-emerald-100' : 'bg-amber-200/15 text-amber-100'}`}>
-              {record.isOfficial ? 'Official' : 'Compiled'}
-            </span>
-            {record.sourceUrl ? (
-              <a className="underline decoration-white/30 underline-offset-2" href={record.sourceUrl} target="_blank" rel="noreferrer">
-                Source
-              </a>
-            ) : null}
-            {record.entryCount < 100 ? (
-              <span className="text-stone-300">{record.entryCount} of 100 songs on record</span>
-            ) : null}
+        {chart && chart.charts.length > 0 ? (
+          <div className="mt-3 space-y-2 text-sm text-stone-200">
+            <p>{chart.songs.length} songs on the charts this year, with no duplicate titles.</p>
+            {chart.charts.map((record) => (
+              <div key={record.id} className="flex flex-wrap items-center gap-2">
+                <span>{record.sourceName}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${record.isOfficial ? 'bg-emerald-300/20 text-emerald-100' : 'bg-amber-200/15 text-amber-100'}`}>
+                  {record.isOfficial ? 'Official' : 'Compiled'}
+                </span>
+                <span className="text-stone-400">{record.entryCount} songs</span>
+                {record.sourceUrl ? (
+                  <a className="underline decoration-white/30 underline-offset-2" href={record.sourceUrl} target="_blank" rel="noreferrer">
+                    Source
+                  </a>
+                ) : null}
+              </div>
+            ))}
           </div>
         ) : null}
-        {record?.methodologyNote ? <p className="mt-2 max-w-2xl text-sm text-stone-300">{record.methodologyNote}</p> : null}
+        {chart?.charts[0]?.methodologyNote ? <p className="mt-2 max-w-2xl text-sm text-stone-300">{chart.charts[0].methodologyNote}</p> : null}
       </header>
       <div ref={frame} className="relative min-h-0 flex-1">
         {isLoading ? (
@@ -126,7 +182,7 @@ export function ChartList({
             </button>
           </div>
         ) : null}
-        {!isLoading && !isError && !record ? (
+        {!isLoading && !isError && entries.length === 0 ? (
           <div className="p-6">
             <h3 className="font-serif text-2xl">No chart on record</h3>
             <p className="mt-2 max-w-lg text-stone-300">
@@ -134,15 +190,15 @@ export function ChartList({
             </p>
           </div>
         ) : null}
-        {!isLoading && !isError && record && entries.length > 0 ? (
+        {!isLoading && !isError && entries.length > 0 ? (
           <FixedSizeList
             ref={listRef}
             height={height}
             width="100%"
             itemCount={entries.length}
             itemSize={72}
-            itemData={{ entries, highlightRank, onOpenSong, onOpenArtist }}
-            itemKey={(index, data) => data.entries[index].rank}
+            itemData={{ entries, highlightRank, playlistArmed, onOpenSong, onOpenArtist, onPlay, onAdd }}
+            itemKey={(index, data) => data.entries[index].song.id}
             overscanCount={8}
             style={{ position: 'absolute', inset: 0 }}
           >

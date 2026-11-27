@@ -12,6 +12,8 @@
     "migrate:dev": "dotenv -e ../.env -- prisma migrate dev",
     "seed": "dotenv -e ../.env -- tsx prisma/seed.ts",
     "import": "dotenv -e ../.env -- tsx src/import/cli.ts",
+    "recordings:find": "tsx src/find-recordings.ts",
+    "recordings:link": "dotenv -e ../.env -- tsx src/link-recordings.ts",
     "test": "dotenv -e ../.env -- vitest run"
   },
   "dependencies": {

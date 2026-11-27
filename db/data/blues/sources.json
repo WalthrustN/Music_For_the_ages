@@ -1,0 +1,69 @@
+{
+  "blues_1912.csv": {
+    "source": "Classic blues standards",
+    "official": false,
+    "note": "W. C. Handy published The Memphis Blues in 1912. He had written the tune in 1909 as the campaign song Mr. Crump. The first recording, by the Victor Military Band, was made on July 15, 1914 and issued that October. Filed in the publication year."
+  },
+  "blues_1914.csv": {
+    "source": "Classic blues standards",
+    "official": false,
+    "note": "W. C. Handy published St. Louis Blues in 1914. Bessie Smith's 1925 record of the same song stays in 1925."
+  },
+  "blues_1917.csv": {
+    "source": "Classic blues standards",
+    "official": false,
+    "note": "Beale Street Blues was published by W. C. Handy in 1917. Tishomingo Blues was published by Spencer Williams in 1917."
+  },
+  "blues_1919.csv": {
+    "source": "Classic blues standards",
+    "official": false,
+    "note": "W. C. Handy published this tune in 1914 as Yellow Dog Rag and reissued it under the title Yellow Dog Blues in 1919. Filed under the title and year on the list."
+  },
+  "blues_1921.csv": {
+    "source": "Ethel Waters",
+    "official": false,
+    "note": "Ethel Waters's first hits, for Black Swan. Down Home Blues, with Fletcher Henderson on piano, was recorded in May 1921 and reached number 5. There'll Be Some Changes Made also reached number 5 in 1921. The order is a listening order, not a chart rank."
+  },
+  "blues_1920.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com. Songs are filed in the year the record was released. The order follows that list, not a chart rank."
+  },
+  "blues_1923.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com, plus Bessie Smith's 1923 record Ain't Nobody's Business If I Do. The song was published in 1922 by Porter Grainger and Everett Robbins. The order is a listening order, not a chart rank."
+  },
+  "blues_1925.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com, plus Bessie Smith's Careless Love Blues, recorded May 26, 1925. See See Rider Blues was recorded in 1924 and issued as a single on February 14, 1925. St. Louis Blues, called The Saint Louis Blues on that list, was issued on April 10, 1925. Handy's own publication of St. Louis Blues is filed in 1914. The order is a listening order, not a chart rank."
+  },
+  "blues_1926.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com. Songs are filed in the year the record was released. The order follows that list, not a chart rank."
+  },
+  "blues_1927.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com. Songs are filed in the year the record was released. The order follows that list, not a chart rank."
+  },
+  "blues_1928.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com. Dark Was the Night, Cold Was the Ground was recorded on December 3, 1927 and issued in 1928. The order follows that list, not a chart rank."
+  },
+  "blues_1929.csv": {
+    "source": "25 Essential Blues Songs from the 1920s",
+    "url": "https://www.musicthisday.com/lists/songs/25-essential-blues-songs-from-1920s",
+    "official": false,
+    "note": "From Egil's list at musicthisday.com. Statesboro Blues was recorded on October 17, 1928 and issued in January 1929. Pine Top's Boogie Woogie was recorded on December 29, 1928 and issued on March 1, 1929. The order follows that list, not a chart rank."
+  }
+}

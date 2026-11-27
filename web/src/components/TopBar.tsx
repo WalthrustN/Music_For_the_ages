@@ -1,6 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useId, useState, type RefObject } from 'react'
+import { useEffect, useId, useState, type ReactNode, type RefObject } from 'react'
 import { api } from '../api'
+import type { ArchiveSettings, PlayerSide } from '../settings'
+import {
+  PANEL_ALPHA_MAX,
+  PANEL_ALPHA_MIN,
+  PANEL_BLUR_MAX,
+  PANEL_BLUR_MIN,
+  PANEL_GRAYSCALE_MAX,
+  PANEL_GRAYSCALE_MIN,
+  PANEL_TONE_MAX,
+  PANEL_TONE_MIN,
+} from '../settings'
 import type { Genre, SearchHit } from '../types'
 
 export function TopBar({
@@ -10,15 +21,23 @@ export function TopBar({
   searchRef,
   onGenre,
   onToggleHeatmap,
+  onOpenSoul,
   onPick,
+  settings,
+  onSettings,
+  playlist,
 }: {
   genres: Genre[]
   genre: string
-  view: 'chart' | 'heatmap'
+  view: 'chart' | 'heatmap' | 'soul'
   searchRef: RefObject<HTMLInputElement | null>
   onGenre: (slug: string) => void
   onToggleHeatmap: () => void
+  onOpenSoul: () => void
   onPick: (hit: SearchHit) => void
+  settings: ArchiveSettings
+  onSettings: (patch: Partial<ArchiveSettings>) => void
+  playlist: ReactNode
 }) {
   const listId = useId()
   const [q, setQ] = useState('')
@@ -36,6 +55,7 @@ export function TopBar({
     enabled: debounced.length > 0,
   })
 
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const results = search.data?.results ?? []
 
   return (
@@ -50,9 +70,23 @@ export function TopBar({
         >
           Coverage
         </button>
+        <button
+          type="button"
+          aria-current={view === 'soul' ? 'page' : undefined}
+          onClick={onOpenSoul}
+          className={`rounded-full border px-3 py-1.5 text-sm ${
+            view === 'soul'
+              ? 'border-amber-100 bg-amber-100 text-neutral-950'
+              : 'border-white/20 bg-black/50 text-ivory hover:bg-black/70'
+          }`}
+        >
+          About soul
+        </button>
+        <div className="ml-auto flex w-full min-w-0 items-center gap-2 sm:w-auto">
+        {playlist}
         <form
           role="search"
-          className="relative ml-auto w-full min-w-0 sm:max-w-sm"
+          className="relative min-w-0 flex-1 sm:w-72 sm:flex-none"
           onSubmit={(event) => event.preventDefault()}
         >
           <label htmlFor="archive-search" className="sr-only">Search songs and artists</label>
@@ -105,6 +139,26 @@ export function TopBar({
             </ul>
           ) : null}
         </form>
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="Settings"
+            aria-expanded={settingsOpen}
+            aria-controls="archive-settings"
+            onClick={() => setSettingsOpen((current) => !current)}
+            className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-black/50 text-ivory hover:bg-black/70"
+          >
+            <Gear />
+          </button>
+          {settingsOpen ? (
+            <SettingsPanel
+              settings={settings}
+              onSettings={onSettings}
+              onClose={() => setSettingsOpen(false)}
+            />
+          ) : null}
+        </div>
+        </div>
       </div>
       <div className="scroll-thin flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Genres">
         {genres.map((item) => {
@@ -126,5 +180,161 @@ export function TopBar({
         })}
       </div>
     </header>
+  )
+}
+
+function FilterSlider({
+  id,
+  label,
+  value,
+  min,
+  max,
+  suffix,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: number
+  min: number
+  max: number
+  suffix: string
+  onChange: (value: number) => void
+}) {
+  return (
+    <>
+      <label className="mt-4 block text-sm" htmlFor={id}>
+        {label} <span className="text-stone-300">{value}{suffix}</span>
+      </label>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="mt-2 w-full accent-amber-100"
+      />
+    </>
+  )
+}
+
+function SettingsPanel({
+  settings,
+  onSettings,
+  onClose,
+}: {
+  settings: ArchiveSettings
+  onSettings: (patch: Partial<ArchiveSettings>) => void
+  onClose: () => void
+}) {
+  return (
+    <div className="scroll-thin absolute right-0 top-12 z-40 max-h-[min(36rem,70vh)] w-72 overflow-y-auto rounded-2xl border border-white/15 bg-neutral-950/95 p-4 shadow-2xl" id="archive-settings">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-serif text-xl text-ivory">Settings</h2>
+        <button type="button" className="text-sm text-stone-300" onClick={onClose}>Close</button>
+      </div>
+      <fieldset className="mt-4">
+        <legend className="text-xs uppercase tracking-[0.16em] text-gold">Panels</legend>
+        <label className="mt-2 block text-sm" htmlFor="panel-alpha">
+          Transparency <span className="text-stone-300">{Math.round((1 - settings.panelAlpha) * 100)}%</span>
+        </label>
+        <input
+          id="panel-alpha"
+          type="range"
+          min={Number((1 - PANEL_ALPHA_MAX).toFixed(2))}
+          max={Number((1 - PANEL_ALPHA_MIN).toFixed(2))}
+          step={0.05}
+          value={Number((1 - settings.panelAlpha).toFixed(2))}
+          onChange={(event) => onSettings({ panelAlpha: 1 - Number(event.target.value) })}
+          className="mt-2 w-full accent-amber-100"
+        />
+        <p className="mt-1 text-xs text-stone-400">Higher lets more of the background show through the chart and lists.</p>
+        <FilterSlider
+          id="panel-blur"
+          label="Backdrop blur"
+          value={settings.panelBlur}
+          min={PANEL_BLUR_MIN}
+          max={PANEL_BLUR_MAX}
+          suffix="px"
+          onChange={(panelBlur) => onSettings({ panelBlur })}
+        />
+        <p className="mt-1 text-xs text-stone-400">Softens the picture behind the glass panels. Zero leaves it sharp.</p>
+        <FilterSlider
+          id="panel-brightness"
+          label="Brightness"
+          value={settings.panelBrightness}
+          min={PANEL_TONE_MIN}
+          max={PANEL_TONE_MAX}
+          suffix="%"
+          onChange={(panelBrightness) => onSettings({ panelBrightness })}
+        />
+        <FilterSlider
+          id="panel-contrast"
+          label="Contrast"
+          value={settings.panelContrast}
+          min={PANEL_TONE_MIN}
+          max={PANEL_TONE_MAX}
+          suffix="%"
+          onChange={(panelContrast) => onSettings({ panelContrast })}
+        />
+        <FilterSlider
+          id="panel-saturate"
+          label="Saturation"
+          value={settings.panelSaturate}
+          min={PANEL_TONE_MIN}
+          max={PANEL_TONE_MAX}
+          suffix="%"
+          onChange={(panelSaturate) => onSettings({ panelSaturate })}
+        />
+        <FilterSlider
+          id="panel-grayscale"
+          label="Grayscale"
+          value={settings.panelGrayscale}
+          min={PANEL_GRAYSCALE_MIN}
+          max={PANEL_GRAYSCALE_MAX}
+          suffix="%"
+          onChange={(panelGrayscale) => onSettings({ panelGrayscale })}
+        />
+        <p className="mt-1 text-xs text-stone-400">Brightness, contrast, saturation, and grayscale change the picture showing through the glass.</p>
+      </fieldset>
+      <fieldset className="mt-4">
+        <legend className="text-xs uppercase tracking-[0.16em] text-gold">Player</legend>
+        <p className="mt-2 text-sm">Corner</p>
+        <div className="mt-2 flex gap-2">
+          {(['left', 'right'] as PlayerSide[]).map((side) => (
+            <button
+              key={side}
+              type="button"
+              aria-pressed={settings.playerSide === side}
+              onClick={() => onSettings({ playerSide: side })}
+              className={`rounded-full px-3 py-1.5 text-sm ${
+                settings.playerSide === side ? 'bg-amber-100 text-neutral-950' : 'bg-white/10 text-ivory'
+              }`}
+            >
+              {side === 'left' ? 'Left' : 'Right'}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          aria-pressed={settings.playerCollapsed}
+          onClick={() => onSettings({ playerCollapsed: !settings.playerCollapsed })}
+          className="mt-3 text-sm text-ivory underline decoration-white/30 underline-offset-2"
+        >
+          {settings.playerCollapsed ? 'Show the video' : 'Collapse the video'}
+        </button>
+        <p className="mt-1 text-xs text-stone-400">The song keeps playing when the video is collapsed. Collapse and Close are also on the player.</p>
+      </fieldset>
+    </div>
+  )
+}
+
+function Gear() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18" strokeLinecap="round" />
+    </svg>
   )
 }

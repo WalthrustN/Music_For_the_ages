@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 
-const YEAR_MIN = 1925
+const YEAR_MIN = 1880
 
 export function YearNav({
   year,
@@ -16,7 +16,7 @@ export function YearNav({
 }) {
   const reduced = usePrefersReducedMotion()
   const decades: number[] = []
-  for (let decade = 1920; decade <= maxYear; decade += 10) decades.push(decade)
+  for (let decade = 1880; decade <= maxYear; decade += 10) decades.push(decade)
   const years: number[] = []
   for (let value = YEAR_MIN; value <= maxYear; value += 1) years.push(value)
   const activeDecade = Math.floor(year / 10) * 10
@@ -37,7 +37,7 @@ export function YearNav({
             key={decade}
             type="button"
             aria-pressed={decade === activeDecade}
-            onClick={() => onYear(Math.max(YEAR_MIN, Math.min(maxYear, decade === 1920 ? YEAR_MIN : decade)))}
+            onClick={() => onYear(Math.max(YEAR_MIN, Math.min(maxYear, decade)))}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs ${
               decade === activeDecade ? 'bg-white/20 text-ivory' : 'bg-black/40 text-stone-300'
             }`}

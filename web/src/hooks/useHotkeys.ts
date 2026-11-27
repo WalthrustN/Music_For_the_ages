@@ -6,6 +6,7 @@ type Handlers = {
   onSearch: () => void
   onMic: () => void
   onHeatmap: () => void
+  captureArrows: boolean
 }
 
 function isTyping(target: EventTarget | null): boolean {
@@ -21,6 +22,8 @@ export function useHotkeys(handlers: Handlers): void {
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (isTyping(event.target) || event.metaKey || event.ctrlKey || event.altKey) return
+      const arrows = event.key === 'ArrowRight' || event.key === 'ArrowLeft' || event.key === 'ArrowDown' || event.key === 'ArrowUp'
+      if (arrows && !latest.current.captureArrows) return
       if (event.key === 'ArrowRight') {
         event.preventDefault()
         latest.current.onYear(1)

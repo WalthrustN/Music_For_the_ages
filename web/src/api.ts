@@ -4,6 +4,7 @@ import type {
   ChatTurn,
   CoverageCell,
   Genre,
+  MixPlaylist,
   SearchHit,
   SongDetail,
   UiAction,
@@ -27,6 +28,11 @@ export const api = {
     return request<{ results: SearchHit[] }>(`/api/search?${query.toString()}`)
   },
   song: (id: number) => request<SongDetail>(`/api/songs/${id}`),
+  setRecording: (id: number, youtubeVideoId: string | null) => request<{ id: number; youtubeVideoId: string | null }>(`/api/songs/${id}/recording`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ youtubeVideoId }),
+  }),
   artist: (id: number) => request<ArtistHistory>(`/api/artists/${id}/history`),
   assistant: (message: string, history: ChatTurn[]) => request<{ answer: string; action?: UiAction }>('/api/assistant', {
     method: 'POST',
@@ -35,5 +41,27 @@ export const api = {
       message,
       history: history.slice(-40).map((turn) => ({ role: turn.role, content: turn.content })),
     }),
+  }),
+  playlists: () => request<{ playlists: MixPlaylist[] }>('/api/playlists'),
+  createPlaylist: (name: string) => request<{ playlist: MixPlaylist }>('/api/playlists', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name }),
+  }),
+  addToPlaylist: (playlistId: number, songIds: number[]) => request<{ playlist: MixPlaylist }>(`/api/playlists/${playlistId}/songs`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ songIds }),
+  }),
+  removeFromPlaylist: (playlistId: number, songId: number) => request<{ playlist: MixPlaylist }>(`/api/playlists/${playlistId}/songs/${songId}`, {
+    method: 'DELETE',
+  }),
+  randomPlaylist: (body: { name?: string; genres: string[]; count?: number }) => request<{ playlist: MixPlaylist }>('/api/playlists/random', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  }),
+  deletePlaylist: (playlistId: number) => request<{ ok: true }>(`/api/playlists/${playlistId}`, {
+    method: 'DELETE',
   }),
 }

@@ -7,5 +7,5 @@ export function normalize(value: string): string {
     .trim()
 }
 
-export const YEAR_MIN = 1925
+export const YEAR_MIN = 1880
 export const YEAR_MAX = 2100

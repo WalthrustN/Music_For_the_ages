@@ -62,8 +62,8 @@ export function parseCsv(csvText: string): { ok: true; rows: CsvRow[] } | { ok: 
       errors.push({ row, message: `rank "${rankText}" is not a whole number` })
     }
     const rank = Number(rankText)
-    if (/^\d+$/.test(rankText) && (rank < 1 || rank > 100)) {
-      errors.push({ row, message: `rank ${rank} is outside 1–100` })
+    if (/^\d+$/.test(rankText) && rank < 1) {
+      errors.push({ row, message: `rank ${rank} must be 1 or greater` })
     } else if (/^\d+$/.test(rankText) && ranks.has(rank)) {
       errors.push({ row, message: `duplicate rank ${rank}` })
     } else if (/^\d+$/.test(rankText)) {
@@ -110,10 +110,6 @@ export function parseCsv(csvText: string): { ok: true; rows: CsvRow[] } | { ok: 
       releaseYear,
     })
   })
-
-  if (records.length > 100) {
-    errors.push({ row: 1, message: `CSV has ${records.length} songs; a chart holds at most 100` })
-  }
 
   if (errors.length > 0) return { ok: false, errors }
   return { ok: true, rows }

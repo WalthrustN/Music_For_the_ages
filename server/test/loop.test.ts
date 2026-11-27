@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { runAssistant } from '../src/llm/loop.js'
 import { parseAnthropicResponse, parseOllamaResponse, parseOpenAIResponse } from '../src/llm/parse.js'
 import { systemPrompt } from '../src/llm/prompt.js'
-import { executeTool, type ToolContext } from '../src/llm/tools.js'
+import { answerForPlayback, executeTool, messageAsksToPlay, playQuery, type ToolContext, type UiAction } from '../src/llm/tools.js'
 import type { LLMClient } from '../src/llm/types.js'
 
 describe('response parsers', () => {
@@ -45,12 +45,43 @@ describe('response parsers', () => {
   })
 })
 
+describe('playback requests', () => {
+  const played: UiAction = {
+    type: 'playSong',
+    songId: 446,
+    title: 'Oh Girl',
+    artist: 'The Chi-Lites',
+    videoId: 'LwjsVD23Z3E',
+    year: 1972,
+  }
+
+  it('treats a title or a play request as playback, and leaves chart questions alone', () => {
+    expect(messageAsksToPlay('Oh Girl')).toBe(true)
+    expect(messageAsksToPlay('Play Oh Girl')).toBe(true)
+    expect(messageAsksToPlay('Who sang Oh Girl?')).toBe(false)
+    expect(messageAsksToPlay('which charts are empty')).toBe(false)
+    expect(playQuery('Play Oh Girl')).toBe('Oh Girl')
+    expect(playQuery('play that')).toBeNull()
+    expect(playQuery('Who sang Oh Girl?')).toBeNull()
+    expect(messageAsksToPlay('Make a random soul playlist')).toBe(false)
+    expect(playQuery('Play a jazz playlist')).toBeNull()
+  })
+
+  it('replaces a false missing-recording answer when the archive can play the song', () => {
+    expect(answerForPlayback('There is no recording to play.', played, false)).toBe(
+      'Playing "Oh Girl" by The Chi-Lites from 1972.',
+    )
+  })
+})
+
 describe('system prompt', () => {
   it('lists genres, the year span, and the rule against guessing', () => {
     const prompt = systemPrompt([{ slug: 'soul', name: 'Soul' }, { slug: 'rnb', name: 'R&B' }], 2026)
     expect(prompt).toContain('soul')
-    expect(prompt).toContain('1925')
+    expect(prompt).toContain('1880')
     expect(prompt).toContain('2026')
+    expect(prompt).toContain('playSong')
+    expect(prompt).toContain('random_playlist')
     expect(prompt).toMatch(/Never invent/)
   })
 })
@@ -60,13 +91,76 @@ describe('tool arguments', () => {
     const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
     const ctx: ToolContext = { lastSearch: null }
     const result = await executeTool(db, 'get_chart', { genre: 'soul', year: 1800 }, ctx)
-    expect(result).toMatchObject({ error: expect.stringMatching(/1925/) })
+    expect(result).toMatchObject({ error: expect.stringMatching(/1880/) })
   })
 
   it('rejects an unknown tool', async () => {
     const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
     const result = await executeTool(db, 'drop_table', {}, { lastSearch: null })
     expect(result).toMatchObject({ error: expect.stringMatching(/Unknown tool/) })
+  })
+
+  it('refuses a playlist write when no writer is configured', async () => {
+    const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
+    const result = await executeTool(db, 'create_playlist', { name: 'Night' }, { lastSearch: null })
+    expect(result).toMatchObject({ error: expect.stringMatching(/not available/) })
+  })
+
+  it('rejects playSong without a song id before touching the database', async () => {
+    const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
+    const result = await executeTool(db, 'set_ui_action', { type: 'playSong' }, { lastSearch: null })
+    expect(result).toMatchObject({ error: expect.stringMatching(/songId/) })
+  })
+
+  it('plays a song the archive actually has', async () => {
+    const db = {
+      song: {
+        findUnique: async () => ({
+          id: 7,
+          title: 'Superstition',
+          featuredArtists: null,
+          releaseYear: 1972,
+          youtubeVideoId: 'abc123def45',
+          primaryArtistId: 3,
+          primaryArtist: { id: 3, name: 'Stevie Wonder' },
+        }),
+      },
+      chartEntry: {
+        findMany: async () => [{
+          rank: 1,
+          song: { id: 7, title: 'Superstition', releaseYear: 1972 },
+          chart: {
+            id: 9,
+            year: 1972,
+            isOfficial: true,
+            sourceName: 'Mock',
+            genre: { slug: 'soul', name: 'Soul' },
+          },
+        }],
+      },
+    } as unknown as PrismaClient
+    const ctx: ToolContext = { lastSearch: null }
+    const result = await executeTool(db, 'set_ui_action', { type: 'playSong', songId: '7' }, ctx)
+    expect(result).toMatchObject({ ok: true, hasRecording: true })
+    expect(ctx.action).toEqual({
+      type: 'playSong',
+      songId: 7,
+      title: 'Superstition',
+      artist: 'Stevie Wonder',
+      videoId: 'abc123def45',
+      genre: 'soul',
+      year: 1972,
+      rank: 1,
+    })
+  })
+
+  it('does not invent a recording for an unknown song', async () => {
+    const db = {
+      song: { findUnique: async () => null },
+      chartEntry: { findMany: async () => { throw new Error('should not list entries') } },
+    } as unknown as PrismaClient
+    const result = await executeTool(db, 'set_ui_action', { type: 'playSong', songId: 99 }, { lastSearch: null })
+    expect(result).toEqual({ error: 'No song with id 99' })
   })
 })
 
