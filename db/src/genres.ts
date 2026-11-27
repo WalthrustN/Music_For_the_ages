@@ -1,6 +1,7 @@
 export const GENRES = [
   { slug: 'soul', name: 'Soul', sortOrder: 10 },
   { slug: 'blues', name: 'Blues', sortOrder: 20 },
+  { slug: 'ragtime', name: 'Ragtime', sortOrder: 25 },
   { slug: 'jazz', name: 'Jazz', sortOrder: 30 },
   { slug: 'rap-hip-hop', name: 'Rap/Hip-Hop', sortOrder: 40 },
   { slug: 'rnb', name: 'R&B', sortOrder: 50 },

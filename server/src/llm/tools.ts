@@ -18,7 +18,7 @@ import {
 } from '../playlists.js'
 import type { ToolDefinition } from './types.js'
 
-const year = z.number().int().min(1880).max(2100)
+const year = z.number().int().min(1860).max(2100)
 
 const argumentSchemas = {
   get_chart: z.object({ genre: z.string().min(1), year }),

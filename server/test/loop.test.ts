@@ -78,7 +78,7 @@ describe('system prompt', () => {
   it('lists genres, the year span, and the rule against guessing', () => {
     const prompt = systemPrompt([{ slug: 'soul', name: 'Soul' }, { slug: 'rnb', name: 'R&B' }], 2026)
     expect(prompt).toContain('soul')
-    expect(prompt).toContain('1880')
+    expect(prompt).toContain('1860')
     expect(prompt).toContain('2026')
     expect(prompt).toContain('playSong')
     expect(prompt).toContain('random_playlist')
@@ -91,7 +91,7 @@ describe('tool arguments', () => {
     const db = new Proxy({}, { get() { throw new Error('db touched') } }) as PrismaClient
     const ctx: ToolContext = { lastSearch: null }
     const result = await executeTool(db, 'get_chart', { genre: 'soul', year: 1800 }, ctx)
-    expect(result).toMatchObject({ error: expect.stringMatching(/1880/) })
+    expect(result).toMatchObject({ error: expect.stringMatching(/1860/) })
   })
 
   it('rejects an unknown tool', async () => {

@@ -20,13 +20,11 @@ type MockChart = {
 }
 
 const MOCK_CHARTS: MockChart[] = [
-  { genre: 'jazz', year: 1965, count: 100, official: false },
   { genre: 'jazz', year: 1972, count: 60, official: true },
   { genre: 'jazz', year: 1980, count: 100, official: false },
   // 1991 is intentionally missing so coverage shows 0 entries.
   { genre: 'jazz', year: 2004, count: 100, official: true },
   { genre: 'jazz', year: 2016, count: 40, official: false },
-  { genre: 'blues', year: 1965, count: 100, official: true },
   { genre: 'blues', year: 1972, count: 100, official: false },
   { genre: 'blues', year: 1980, count: 25, official: true },
   { genre: 'blues', year: 1991, count: 100, official: false },
@@ -133,6 +131,9 @@ async function main(): Promise<void> {
         })
       }
 
+      await tx.chart.deleteMany({
+        where: { year: 1965, genre: { slug: { in: ['blues', 'jazz'] } }, sourceName: { startsWith: 'Mock' } },
+      })
       await tx.chart.deleteMany({
         where: { genre: { slug: 'soul' }, sourceName: { startsWith: 'Mock' } },
       })

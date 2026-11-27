@@ -33,7 +33,7 @@ function songs(): { title: string; artist: string }[] {
     seen.add(key)
     rows.push({ title, artist })
   }
-  for (const folder of ['soul', 'blues', 'jazz']) {
+  for (const folder of ['soul', 'blues', 'jazz', 'gospel', 'rnb', 'classical', 'ragtime']) {
     const dir = join(root, 'data', folder)
     for (const name of readdirSync(dir)) {
       if (!name.endsWith('.csv')) continue

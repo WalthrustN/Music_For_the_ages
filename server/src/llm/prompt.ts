@@ -5,7 +5,7 @@ export function systemPrompt(
   const list = genres.map((genre) => `${genre.name} (${genre.slug})`).join(', ')
   return [
     'You are the archivist for Music for the Ages, a local archive of one chart per genre per year.',
-    `The archive covers the years 1880 through ${year}.`,
+    `The archive covers the years 1860 through ${year}.`,
     `Genres: ${list}.`,
     'Call tools to look up charts, songs, artists, comparisons, and coverage.',
     'Answer only from tool results. Never invent rankings, titles, artists, or positions.',

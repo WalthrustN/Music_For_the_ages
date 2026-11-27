@@ -1,0 +1,47 @@
+{
+  "classical_1867.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "The Blue Danube, An der schönen blauen Donau, Op. 314, was first sung in Vienna on February 15, 1867. The orchestral waltz is the form that lasted. The archive now starts at 1860 so this year can be filed."
+  },
+  "classical_1883.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Voices of Spring, Frühlingsstimmen, Op. 410, was first sung on March 1, 1883 at the Theater an der Wien by Bianca Bianchi, with Johann Strauss II conducting. Eduard Strauss led the orchestral version on March 18, 1883."
+  },
+  "classical_1892.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Waltz of the Flowers is from Act II of The Nutcracker, Op. 71. Tchaikovsky conducted the Nutcracker Suite, Op. 71a, which includes this waltz, in St. Petersburg on March 19, 1892. The ballet premiered at the Mariinsky Theatre on December 18, 1892."
+  },
+  "classical_1901.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Piano Concerto No. 2 in C minor, Op. 18, was premiered complete on November 9, 1901 in Moscow, with Rachmaninoff at the piano and Alexander Siloti conducting. The second and third movements had been played on December 15, 1900."
+  },
+  "classical_1905.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Clair de Lune is the third movement of Suite bergamasque. Debussy wrote it about 1890. The suite was published in 1905."
+  },
+  "classical_1908.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Golliwogg's Cakewalk is the last movement of Children's Corner. Durand published the suite in July 1908. Harold Bauer gave the premiere in Paris on December 18, 1908."
+  },
+  "classical_1913.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "The Rite of Spring, Le Sacre du printemps, was premiered on May 29, 1913 at the Théâtre des Champs-Élysées. Pierre Monteux conducted the Ballets Russes."
+  },
+  "classical_1920.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Ragtime for 11 Instruments was finished on November 10, 1918. A piano reduction was heard in Lausanne on November 8, 1919. The eleven-instrument version was first played in London on April 27, 1920."
+  },
+  "classical_1924.csv": {
+    "source": "Classical works",
+    "official": false,
+    "note": "Rhapsody in Blue was premiered on February 12, 1924 at Aeolian Hall in New York. Gershwin played the piano with Paul Whiteman and His Orchestra. Ferde Grofé orchestrated it."
+  }
+}
